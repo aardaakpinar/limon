@@ -33,15 +33,18 @@ header {
     padding: 1.5rem 0;
 }
 
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
+.logo{
+    display:flex;
+    align-items:center;
+    gap:.8rem;
+    font-weight:800;
+    font-size:1.5rem;
 }
 
-.logo img {
-    width: 50px;
-    height: 50px;
+.logo span{
+    background:linear-gradient(135deg,var(--primary),var(--accent));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
 }
 
 nav {
