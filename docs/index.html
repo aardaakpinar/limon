@@ -1,105 +1,140 @@
 <!doctype html>
-<html lang="tr">
+<html lang="tr" class="dark">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>LiMON - Kontrol Sende</title>
-        <link
-            rel="shortcut icon"
-            href="https://aardaakpinar.github.io/assets/images/logos/limon.png"
-            type="image/x-icon"
-        />
-        <link rel="stylesheet" href="styles.css" />
+        <title>LiMON</title>
+        <link rel="shortcut icon" href="https://aardaakpinar.github.io/assets/images/logos/limon.png">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="tailwind.config.js"></script>
+        <link rel="stylesheet" href="style.css" />
     </head>
-    <body>
-        <div class="container">
-            <header>
-                <div class="logo">
-                    <span>LiMON</span>
-                </div>
-                <nav>
-                    <a href="#features">Özellikler</a>
-                    <a href="#setup">Kurulum</a>
-                    <button class="btn" onclick="window.open('https://github.com/aardaakpinar/limon', '_blank')">
-                        Başla
-                    </button>
-                </nav>
-            </header>
 
-            <section class="hero">
-                <div class="badge">Kontrollü Yapay Zeka Ajanı</div>
-                <h1>AI çalışsın.<br />Kontrol sende kalsın.</h1>
-                <p>
-                    Gemini, Claude ve OpenAI modellerini güvenli sandbox ortamında birleştir. Komutları sen onayla, AI
-                    yürütür.
+    <body class="font-sans antialiased text-white overflow-x-hidden">
+        <!-- Navbar -->
+        <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/40 border-b border-white/5">
+            <nav class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+                <a href="" class="flex items-center gap-3 group">
+                    <img src="https://aardaakpinar.github.io/assets/images/logos/limon.png" class="h-9 rounded-lg group-hover:scale-105 transition" alt="LiMON Logo"/>
+                    <span class="text-xl font-bold tracking-tight text-limon">LiMON</span>
+                </a>
+
+                <div class="hidden md:flex items-center gap-6 text-sm text-white/70">
+                    <a href="#ozellikler" class="hover:text-white transition">Özellikler</a>
+                    <a href="#kurulum" class="hover:text-white transition">Kurulum</a>
+                    <a href="https://github.com/aardaakpinar/limon" target="_blank" class="hover:text-white transition">GitHub</a>
+                    <a href="https://aardaakpinar.github.io/limon/" target="_blank" class="ml-4 bg-limon text-black px-5 py-2 rounded-lg font-semibold hover:shadow-glow transition">
+                        Hemen Başla
+                    </a>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Hero -->
+        <section class="relative flex min-h-screen items-center justify-center pt-24 grid-bg">
+            <div class="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-limon/10 blur-[120px] rounded-full"></div>
+
+            <div class="relative max-w-5xl px-6 text-center">
+                <span class="inline-block mb-8 px-4 py-2 rounded-full border border-limon/30 bg-limon/10 text-limon text-sm">
+                    Kontrollü Yapay Zeka Ajani
+                </span>
+
+                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
+                    AI çalışsın.<br />
+                    <span class="text-limon">Kontrol sende kalsin.</span>
+                </h1>
+
+                <p class="mt-6 max-w-2xl mx-auto text-lg text-white/60">
+                    Gemini, Claude ve OpenAI modellerini guvenli sandbox ortaminda birlestir. Komutlari sen onayla, AI
+                    yurutsun.
                 </p>
-                <button class="btn">Hemen Başla</button>
 
-                <div class="logos">
-                    <img src="svg/gemini.png" alt="Google Gemini" />
-                    <img src="svg/claude.svg" alt="Anthropic Claude" />
-                    <img src="svg/chatgpt.svg" alt="OpenAI ChatGPT" />
+                <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="https://github.com/aardaakpinar/limon" target="_blank" class="bg-limon text-black px-8 py-3 rounded-lg font-semibold hover:brightness-110 hover:shadow-glow transition">
+                        GitHub'dan Başla
+                    </a>
+                    <a href="#kurulum" class="border border-white/20 px-8 py-3 rounded-lg hover:bg-white/5 transition">
+                        Kurulum Rehberi
+                    </a>
                 </div>
-            </section>
 
-            <section class="features" id="features">
-                <h2 class="section-title">Neden LiMON?</h2>
-                <div class="grid">
-                    <div class="card">
-                        <h3>🛡️ Güvenli Sandbox</h3>
-                        <p>AI yalnızca izin verdiğin dizinde çalışır. Sistem dosyalarına erişemez.</p>
-                    </div>
-
-                    <div class="card">
-                        <h3>✋ Onay Mekanizması</h3>
-                        <p>Her komut önce sana gösterilir. Onaylamadan hiçbir işlem yapılmaz.</p>
-                    </div>
-
-                    <div class="card">
-                        <h3>🤖 Çoklu Model Desteği</h3>
-                        <p>Google Gemini, Claude ve OpenAI arasında anında geçiş yap.</p>
-                    </div>
-
-                    <div class="card">
-                        <h3>📂 Dosya & Kod Yönetimi</h3>
-                        <p>Dosya oluştur, düzenle, test et. Terminal komutlarını güvenle çalıştır.</p>
+                <!-- Terminal Demo -->
+                <div class="mt-16 max-w-2xl mx-auto animate-float">
+                    <div class="rounded-xl border border-white/10 bg-black/60 backdrop-blur-xl shadow-2xl overflow-hidden">
+                        <div class="flex items-center gap-2 px-4 py-3 border-b border-white/10">
+                            <div class="w-3 h-3 bg-red-500/60 rounded-full"></div>
+                            <div class="w-3 h-3 bg-limon/70 rounded-full"></div>
+                            <div class="w-3 h-3 bg-green-500/60 rounded-full"></div>
+                            <span class="ml-2 text-xs text-white/40 font-mono">limon ~ terminal</span>
+                        </div>
+                        <div class="px-6 py-5 font-mono text-sm text-left space-y-2">
+                            <div><span class="text-limon">$</span> limon "Yeni bir React projesi olustur"</div>
+                            <div class="text-white/50">&gt; Proje yapisi olusturuluyor...</div>
+                            <div class="text-white/50">&gt; Bagimliliklar yukleniyor...</div>
+                            <div class="text-green-400">[ONAY] npm install calistirilsin mi? (e/h)</div>
+                            <div>
+                                <span class="text-limon">$</span> e<span class="animate-pulse text-limon">_</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <section class="setup" id="setup">
-                <h2 class="section-title">Kurulum</h2>
+        <!-- Features -->
+        <section id="ozellikler" class="py-24 grid-bg">
+            <div class="max-w-6xl mx-auto px-6 text-center">
+                <h2 class="text-3xl md:text-5xl font-bold mb-16">Neden LiMON?</h2>
 
-                <div class="setup-card">
-                    <p class="setup-desc">
-                        LiMON AI'yı kurmak sadece birkaç dakika sürer. GitHub'dan indir, bağımlılıkları kur ve hemen
-                        kullanmaya başla.
-                    </p>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition">
+                        <h3 class="font-semibold mb-3">Güvenli Sandbox</h3>
+                        <p class="text-sm text-white/60">AI yalnızca izin verdiğin dizinde çalışır.</p>
+                    </div>
 
-                    <ol class="setup-steps">
-                        <li>GitHub'dan LiMON AI reposunu indir</li>
-                        <li>Klasörü aç ve bağımlılıkları yükle</li>
-                        <li>LiMON AI'yı başlat ve ilk projeni oluştur</li>
-                    </ol>
+                    <div class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition">
+                        <h3 class="font-semibold mb-3">Onay Mekanizması</h3>
+                        <p class="text-sm text-white/60">Her komut önce sana gösterilir.</p>
+                    </div>
 
-                    <div class="code-block">
-                        <pre><code>git clone https://github.com/aardaakpinar/limon.git
-cd limon
-npm install
-npm run start</code></pre>
+                    <div class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition">
+                        <h3 class="font-semibold mb-3">Çoklu Model</h3>
+                        <p class="text-sm text-white/60">Gemini, Claude ve OpenAI desteği.</p>
+                    </div>
+
+                    <div class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition">
+                        <h3 class="font-semibold mb-3">Kod & Terminal</h3>
+                        <p class="text-sm text-white/60">Dosya ve komut yönetimi tek yerden.</p>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <section class="cta">
-                <h2>İlk Projeni LiMON ile Başlat</h2>
-                <p>Güvenli, kontrollü ve Türkçe konuşan AI ajanı seni bekliyor.</p>
-                <button class="btn" onclick="window.open('https://github.com/aardaakpinar/limon', '_blank')">
-                    GitHub'dan İndir
-                </button>
-            </section>
+        <!-- Kurulum -->
+        <section id="kurulum" class="py-24 grid-bg">
+            <div class="max-w-4xl mx-auto px-6 text-center">
+                <h2 class="text-3xl md:text-5xl font-bold mb-12">Dakikalar içinde hazır</h2>
 
-            <footer>🍋 LiMON AI – MIT License</footer>
-        </div>
+                <div class="space-y-6 text-left">
+                    <p class="text-white/60">LiMON'u kurmak için aşağıdaki adımları izleyin:</p>
+                    <div class="p-6 rounded-xl border border-white/10 bg-white/5">
+                        <code class="text-limon">git clone https://github.com/aardaakpinar/limon.git</code>
+                    </div>
+                    <p class="text-white/60">Depoyu klonladıktan sonra:</p>
+                    <div class="p-6 rounded-xl border border-white/10 bg-white/5">
+                        <code class="text-limon">cd limon && npm install</code>
+                    </div>
+                    <p class="text-white/60">Kurulum tamamlandiktan sonra:</p>
+                    <div class="p-6 rounded-xl border border-white/10 bg-white/5">
+                        <code class="text-limon">npm run start</code>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-12 border-t border-white/10 text-center text-white/40">
+            <p>2026 LiMON. Açık Kaynak.</p>
+        </footer>
     </body>
 </html>
