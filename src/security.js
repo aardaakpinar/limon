@@ -25,7 +25,8 @@ const DEFAULT_BLOCKED = [
 
 function isPathSafe(filePath, workDir) {
     const abs = path.resolve(workDir, filePath);
-    return abs.startsWith(path.resolve(workDir));
+    const base = path.resolve(workDir);
+    return abs === base || abs.startsWith(base + path.sep);
 }
 
 function checkBlockedCommand(cmd, blockedList) {
