@@ -8,3 +8,9 @@ body {
     linear-gradient(90deg, rgba(252,196,29,0.05) 1px, transparent 1px);
     background-size: 60px 60px;
 }
+
+code {
+    display: block;
+    overflow-x: auto;
+    user-select: all;
+}
