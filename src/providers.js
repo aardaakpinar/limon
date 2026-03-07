@@ -3,6 +3,7 @@
  */
 
 const history = [];
+const MAX_HISTORY_ITEMS = 20;
 
 function buildSystemPrompt(workDir) {
     return `Sen Limon adinda terminal tabanli bir AI asistansin.
@@ -37,6 +38,7 @@ KURALLAR:
 
 async function askGemini(userMessage, apiKey, workDir) {
     history.push({ role: "user", parts: [{ text: userMessage }] });
+    trimHistory();
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
     const res = await fetch(url, {
         method: "POST",
@@ -55,11 +57,13 @@ async function askGemini(userMessage, apiKey, workDir) {
     const data = await res.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
     history.push({ role: "model", parts: [{ text }] });
+    trimHistory();
     return parseResponse(text);
 }
 
 async function askClaude(userMessage, apiKey, workDir) {
     history.push({ role: "user", content: userMessage });
+    trimHistory();
     const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
@@ -74,6 +78,7 @@ async function askClaude(userMessage, apiKey, workDir) {
     const data = await res.json();
     const text = data.content?.[0]?.text || "";
     history.push({ role: "assistant", content: text });
+    trimHistory();
     return parseResponse(text);
 }
 
@@ -82,6 +87,7 @@ async function askOpenAI(userMessage, apiKey, workDir) {
         history.unshift({ role: "system", content: buildSystemPrompt(workDir) });
     }
     history.push({ role: "user", content: userMessage });
+    trimHistory(true);
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
@@ -91,6 +97,7 @@ async function askOpenAI(userMessage, apiKey, workDir) {
     const data = await res.json();
     const text = data.choices?.[0]?.message?.content || "";
     history.push({ role: "assistant", content: text });
+    trimHistory(true);
     return parseResponse(text);
 }
 
@@ -120,9 +127,88 @@ function tryParseFromBody(raw) {
 
 function sanitizeCommand(command) {
     if (!command || typeof command !== "object") return null;
-    const allowed = new Set(["shell", "file", "app", "api"]);
-    if (!allowed.has(command.type)) return null;
-    return command;
+    if (!isNonEmptyString(command.type, 20)) return null;
+
+    if (command.type === "shell") {
+        if (!isNonEmptyString(command.exec, 500)) return null;
+        return { type: "shell", action: safeText(command.action, 120), exec: command.exec.trim() };
+    }
+
+    if (command.type === "file") {
+        const allowedActions = new Set(["write", "append", "read", "delete", "mkdir", "list", "move"]);
+        if (!allowedActions.has(command.action)) return null;
+        if (!isNonEmptyString(command.path, 260)) return null;
+
+        const base = { type: "file", action: command.action, path: command.path.trim() };
+        if (command.action === "write" || command.action === "append") {
+            base.content = typeof command.content === "string" ? command.content : "";
+        }
+        if (command.action === "move") {
+            if (!isNonEmptyString(command.to, 260)) return null;
+            base.to = command.to.trim();
+        }
+        return base;
+    }
+
+    if (command.type === "app") {
+        if (!isNonEmptyString(command.app, 80)) return null;
+        if (command.args !== undefined && !Array.isArray(command.args)) return null;
+        const args = Array.isArray(command.args) ? command.args : [];
+        if (args.some((a) => !isNonEmptyString(a, 200))) return null;
+        return { type: "app", action: safeText(command.action, 120), app: command.app.trim(), args };
+    }
+
+    if (command.type === "api") {
+        if (!isNonEmptyString(command.url, 2000)) return null;
+        const method = String(command.method || "GET").toUpperCase();
+        const allowedMethods = new Set(["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"]);
+        if (!allowedMethods.has(method)) return null;
+        const headers = sanitizeHeaders(command.headers);
+        if (headers === null) return null;
+        const sanitized = { type: "api", action: safeText(command.action, 120), url: command.url.trim(), method, headers };
+        if (command.body !== undefined) sanitized.body = command.body;
+        return sanitized;
+    }
+
+    return null;
+}
+
+function sanitizeHeaders(headers) {
+    if (headers === undefined) return {};
+    if (!headers || typeof headers !== "object" || Array.isArray(headers)) return null;
+    const out = {};
+    for (const [k, v] of Object.entries(headers)) {
+        if (!isNonEmptyString(k, 80)) return null;
+        if (!isNonEmptyString(String(v), 500)) return null;
+        out[k] = String(v);
+    }
+    return out;
+}
+
+function trimHistory(hasSystemFirst = false) {
+    if (!hasSystemFirst) {
+        if (history.length > MAX_HISTORY_ITEMS) {
+            history.splice(0, history.length - MAX_HISTORY_ITEMS);
+        }
+        return;
+    }
+
+    if (history.length <= MAX_HISTORY_ITEMS) return;
+    const system = history[0] && history[0].role === "system" ? history[0] : null;
+    const start = system ? 1 : 0;
+    const tail = history.slice(Math.max(start, history.length - (MAX_HISTORY_ITEMS - start)));
+    history.length = 0;
+    if (system) history.push(system);
+    history.push(...tail);
+}
+
+function isNonEmptyString(v, maxLen) {
+    return typeof v === "string" && v.trim().length > 0 && v.length <= maxLen;
+}
+
+function safeText(v, maxLen) {
+    if (typeof v !== "string") return "";
+    return v.slice(0, maxLen);
 }
 
 function clearHistory() {

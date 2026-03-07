@@ -31,49 +31,77 @@ function parseCliArgs(argv) {
     };
 }
 
+function resolveApiKey(cfg) {
+    if (cfg && typeof cfg.apiKey === "string" && cfg.apiKey.trim()) return cfg.apiKey.trim();
+    const envKeyMap = {
+        gemini: process.env.LIMON_GEMINI_API_KEY || process.env.GEMINI_API_KEY,
+        claude: process.env.LIMON_CLAUDE_API_KEY || process.env.ANTHROPIC_API_KEY,
+        openai: process.env.LIMON_OPENAI_API_KEY || process.env.OPENAI_API_KEY,
+    };
+    const providerKey = cfg && cfg.provider ? envKeyMap[cfg.provider] : null;
+    if (providerKey && providerKey.trim()) return providerKey.trim();
+    if (process.env.LIMON_API_KEY && process.env.LIMON_API_KEY.trim()) return process.env.LIMON_API_KEY.trim();
+    return "";
+}
+
+function getAskFn(provider) {
+    const askFn = { gemini: askGemini, claude: askClaude, openai: askOpenAI }[provider];
+    if (!askFn) throw new Error("Desteklenmeyen provider: " + provider);
+    return askFn;
+}
+
 async function main() {
     const cli = parseCliArgs(process.argv);
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
     let cfg = loadConfig();
-    if (cli.forceSetup || !cfg.provider || !cfg.apiKey || !cfg.workDir) {
+    let runtimeApiKey = resolveApiKey(cfg);
+    let askFn = null;
+    let executor = null;
+    if (cli.forceSetup || !cfg.provider || !cfg.workDir || !runtimeApiKey) {
         printBanner();
         cfg = await setup(rl);
+        runtimeApiKey = resolveApiKey(cfg);
     }
 
     if (cli.clearHistoryFlag) clearHistory();
 
+    function refreshRuntime() {
+        runtimeApiKey = resolveApiKey(cfg);
+        askFn = getAskFn(cfg.provider);
+        executor = new CommandExecutor(cfg);
+    }
+
+    refreshRuntime();
     printBanner(cfg.workDir);
-
-    const askFn = { gemini: askGemini, claude: askClaude, openai: askOpenAI }[cfg.provider];
-    if (!askFn) throw new Error("Desteklenmeyen provider: " + cfg.provider);
-
-    const executor = new CommandExecutor(cfg.workDir, cfg.securityEnabled !== false);
     const pName = cfg.provider.charAt(0).toUpperCase() + cfg.provider.slice(1);
 
     log.success(`${pName} ile baglandi.`);
     log.info(`Sandbox  : ${c.yellow}${cfg.workDir}${c.reset}`);
     log.info(`Guvenlik : ${cfg.securityEnabled !== false ? c.green + "ACIK" : c.red + "KAPALI"}${c.reset}`);
-    log.info(`Komutlar : ${c.yellow}--setup${c.reset} | ${c.yellow}--temizle${c.reset} | ${c.yellow}cik${c.reset}`);
+    log.info(`App acma : ${cfg.allowAppLaunch === true ? c.green + "ACIK" : c.red + "KAPALI"}${c.reset}`);
+    log.info(`API cagrilari : ${cfg.allowApiCalls === true ? c.green + "ACIK" : c.red + "KAPALI"}${c.reset}`);
+    log.info(`Komutlar : ${c.yellow}--setup${c.reset} | ${c.yellow}--temizle${c.reset} | ${c.yellow}--quit${c.reset}`);
     console.log();
 
-    async function runTurn(raw, allowControlCommands = true) {
+    async function runTurn(raw) {
         const t = (raw || "").trim();
         if (!t) return true;
 
-        if (allowControlCommands && ["cik", "exit", "quit"].includes(t.toLowerCase())) {
+        if (t === "--quit") {
             log.ai("Gorusmek uzere!", cfg.provider);
             return false;
         }
 
-        if (allowControlCommands && t === "--setup") {
+        if (t === "--setup") {
             clearHistory();
             cfg = await setup(rl);
+            refreshRuntime();
             printBanner(cfg.workDir);
             return true;
         }
 
-        if (allowControlCommands && (t === "--temizle" || t === "--clear")) {
+        if (t === "--clear") {
             clearHistory();
             log.success("Gecmis temizlendi.");
             console.log();
@@ -82,7 +110,7 @@ async function main() {
 
         try {
             log.info("Dusunuyor...");
-            const { message, command } = await askFn(t, cfg.apiKey, cfg.workDir);
+            const { message, command } = await askFn(t, runtimeApiKey, cfg.workDir);
 
             if (message) log.ai(message, cfg.provider);
 
@@ -115,14 +143,14 @@ async function main() {
     }
 
     if (cli.oneShotQuery) {
-        await runTurn(cli.oneShotQuery, false);
+        await runTurn(cli.oneShotQuery);
         rl.close();
         return;
     }
 
     const ask = () => {
         rl.question(`  ${c.green}Siz${c.reset} ${c.gray}>${c.reset} `, async (raw) => {
-            const keepGoing = await runTurn(raw, true);
+            const keepGoing = await runTurn(raw);
             if (!keepGoing) {
                 rl.close();
                 return;

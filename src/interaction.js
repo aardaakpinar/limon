@@ -19,6 +19,9 @@ async function requestApproval(cmd, rl, workDir) {
         console.log(`  ${c.yellow}Arguman:${c.reset} ${c.white}${cmd.args.join(" ")}${c.reset}`);
     }
     if (cmd.path) console.log(`  ${c.yellow}Yol   :${c.reset} ${c.white}${path.resolve(workDir, cmd.path)}${c.reset}`);
+    if (cmd.to) console.log(`  ${c.yellow}Hedef :${c.reset} ${c.white}${path.resolve(workDir, cmd.to)}${c.reset}`);
+    if (cmd.url) console.log(`  ${c.yellow}URL   :${c.reset} ${c.white}${cmd.url}${c.reset}`);
+    if (cmd.method) console.log(`  ${c.yellow}Method:${c.reset} ${c.white}${cmd.method}${c.reset}`);
 
     if (cmd.content) {
         const lines = String(cmd.content).split("\n");

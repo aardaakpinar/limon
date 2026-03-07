@@ -5,13 +5,18 @@
 const { exec, spawn } = require("child_process");
 const fs = require("fs");
 const path = require("path");
-const { checkBlockedCommand, BlockedError, isPathSafe } = require("./security");
+const { checkBlockedCommand, checkBlockedShellSyntax, validateApiUrl, BlockedError, isPathSafe } = require("./security");
 
 class CommandExecutor {
-    constructor(workDir, securityEnabled) {
-        this.workDir = workDir;
+    constructor(cfgOrWorkDir, securityEnabled) {
+        const isCfgObject = cfgOrWorkDir && typeof cfgOrWorkDir === "object";
+        this.workDir = isCfgObject ? cfgOrWorkDir.workDir : cfgOrWorkDir;
+        const effectiveSecurityEnabled = isCfgObject ? cfgOrWorkDir.securityEnabled !== false : securityEnabled;
         const { DEFAULT_BLOCKED } = require("./security");
-        this.blocked = securityEnabled ? DEFAULT_BLOCKED : [];
+        this.blocked = effectiveSecurityEnabled ? DEFAULT_BLOCKED : [];
+        this.allowAppLaunch = isCfgObject ? cfgOrWorkDir.allowAppLaunch === true : true;
+        this.allowApiCalls = isCfgObject ? cfgOrWorkDir.allowApiCalls === true : true;
+        this.allowedApiDomains = isCfgObject && Array.isArray(cfgOrWorkDir.allowedApiDomains) ? cfgOrWorkDir.allowedApiDomains : [];
     }
 
     execute(cmd) {
@@ -35,6 +40,11 @@ class CommandExecutor {
 
         const blocked = checkBlockedCommand(rawCmd, this.blocked);
         if (blocked) throw new BlockedError(`"${blocked}" kategorisi engellendi.`);
+        const blockedSyntax = checkBlockedShellSyntax(rawCmd);
+        if (blockedSyntax) throw new BlockedError(`"${blockedSyntax}" guvenlik nedeniyle engellendi.`);
+        if (/[a-zA-Z]:[\\/]/.test(rawCmd) || /(^|[\s"'`])\/(?!\/)/.test(rawCmd)) {
+            throw new BlockedError("Shell komutunda mutlak yol kullanimi engellendi.");
+        }
 
         return new Promise((res, rej) =>
             exec(rawCmd, { timeout: 30000, cwd: this.workDir, maxBuffer: 1024 * 1024 }, (err, out, serr) =>
@@ -96,6 +106,7 @@ class CommandExecutor {
     }
 
     app({ app, args = [] }) {
+        if (!this.allowAppLaunch) throw new BlockedError("Uygulama baslatma kapali. Kurulumdan etkinlestirin.");
         if (!app || typeof app !== "string") throw new Error("Uygulama adi eksik.");
         if (!/^[a-zA-Z0-9._-]+$/.test(app)) throw new BlockedError("Gecersiz uygulama adi: " + app);
         if (!Array.isArray(args) || args.some((a) => typeof a !== "string" || a.length > 200)) {
@@ -117,6 +128,9 @@ class CommandExecutor {
     }
 
     async apiCall({ url, method = "GET", body, headers = {} }) {
+        if (!this.allowApiCalls) throw new BlockedError("API komutlari kapali. Kurulumdan etkinlestirin.");
+        const validated = validateApiUrl(url, this.allowedApiDomains);
+        if (!validated.ok) throw new BlockedError(validated.reason);
         const r = await fetch(url, {
             method,
             headers: { "Content-Type": "application/json", ...headers },
