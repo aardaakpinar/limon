@@ -38,6 +38,12 @@ function isPathSafe(filePath, workDir) {
     return abs === base || abs.startsWith(base + path.sep);
 }
 
+function isPathWithin(baseDir, targetPath) {
+    const base = path.resolve(baseDir);
+    const target = path.resolve(targetPath);
+    return target === base || target.startsWith(base + path.sep);
+}
+
 function checkBlockedCommand(cmd, blockedList) {
     for (const rule of blockedList) {
         if (rule.pattern.test(cmd)) return rule.label;
@@ -112,6 +118,7 @@ class BlockedError extends Error {
 module.exports = {
     DEFAULT_BLOCKED,
     isPathSafe,
+    isPathWithin,
     checkBlockedCommand,
     checkBlockedShellSyntax,
     validateApiUrl,

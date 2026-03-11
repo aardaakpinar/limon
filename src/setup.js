@@ -15,13 +15,11 @@ async function setup(rl) {
     console.log("  " + hr());
     console.log();
 
-    const defaultDir = path.join(os.homedir(), "limon-workspace");
-    console.log(`  ${c.white}Calisma dizini (sandbox) - AI yalnizca bu klasorde islem yapabilir.${c.reset}`);
-    console.log(`  ${c.gray}Varsayilan: ${defaultDir}${c.reset}\n`);
-    const dirInput = await question(rl, `  ${c.yellow}Dizin [Enter = varsayilan]:${c.reset} `);
-    const workDir = path.resolve(dirInput.trim() || defaultDir);
+    const workDir = path.resolve("/home/limon");
+    console.log(`  ${c.white}Calisma dizini - Limon tum dosyalari bu alanda olusturur/duzenler.${c.reset}`);
+    console.log(`  ${c.gray}Sabit: ${workDir}${c.reset}\n`);
     fs.mkdirSync(workDir, { recursive: true });
-    log.success(`Sandbox dizini: ${workDir}`);
+    log.success(`Calisma dizini: ${workDir}`);
     console.log();
 
     console.log(`  ${c.white}Guvenlik engelleri - yuksek riskli komutlar:${c.reset}`);
@@ -94,7 +92,16 @@ async function setup(rl) {
     const saveKeyInput = await question(rl, `  ${c.yellow}API key config dosyasina kaydedilsin mi? [e/H]:${c.reset} `);
     const persistApiKey = ["e", "evet"].includes(saveKeyInput.toLowerCase().trim());
 
-    const runtimeCfg = { provider, apiKey: apiKey.trim(), workDir, securityEnabled, allowAppLaunch, allowApiCalls, allowedApiDomains };
+    const runtimeCfg = {
+        provider,
+        apiKey: apiKey.trim(),
+        workDir,
+        agentHome: workDir,
+        securityEnabled,
+        allowAppLaunch,
+        allowApiCalls,
+        allowedApiDomains,
+    };
     const saveCfg = { ...runtimeCfg, apiKey: persistApiKey ? runtimeCfg.apiKey : "" };
     saveConfig(saveCfg);
     const { CONFIG_FILE } = require("./config");

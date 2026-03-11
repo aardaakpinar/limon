@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "🍋 Limon AI Ajan — Gemini, Claude, ChatGPT destekli",
   "main": "src/index.js",
+  "bin": {
+    "limon": "src/index.js"
+  },
   "scripts": {
     "start": "node src/index.js",
     "setup": "node src/index.js --setup"

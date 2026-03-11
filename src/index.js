@@ -5,12 +5,15 @@
  */
 
 const readline = require("readline");
+const fs = require("fs");
+const path = require("path");
 const { loadConfig } = require("./config");
 const { printBanner, log, c } = require("./ui");
 const { setup } = require("./setup");
 const { CommandExecutor } = require("./executor");
 const { askGemini, askClaude, askOpenAI, clearHistory } = require("./providers");
-const { requestApproval } = require("./interaction");
+const { requestApproval, shouldRequireApproval } = require("./interaction");
+const { isPathWithin } = require("./security");
 
 function parseCliArgs(argv) {
     const args = argv.slice(2);
@@ -44,6 +47,17 @@ function resolveApiKey(cfg) {
     return "";
 }
 
+function resolveAgentHome(cfg) {
+    if (!cfg || !cfg.workDir) return null;
+    let agentHome = cfg.agentHome ? path.resolve(cfg.agentHome) : path.resolve(cfg.workDir);
+    if (!isPathWithin(cfg.workDir, agentHome)) {
+        agentHome = path.resolve(cfg.workDir);
+    }
+    fs.mkdirSync(agentHome, { recursive: true });
+    cfg.agentHome = agentHome;
+    return agentHome;
+}
+
 function getAskFn(provider) {
     const askFn = { gemini: askGemini, claude: askClaude, openai: askOpenAI }[provider];
     if (!askFn) throw new Error("Desteklenmeyen provider: " + provider);
@@ -64,6 +78,8 @@ async function main() {
         runtimeApiKey = resolveApiKey(cfg);
     }
 
+    resolveAgentHome(cfg);
+
     if (cli.clearHistoryFlag) clearHistory();
 
     function refreshRuntime() {
@@ -77,7 +93,8 @@ async function main() {
     const pName = cfg.provider.charAt(0).toUpperCase() + cfg.provider.slice(1);
 
     log.success(`${pName} ile baglandi.`);
-    log.info(`Sandbox  : ${c.yellow}${cfg.workDir}${c.reset}`);
+    log.info(`Calisma  : ${c.yellow}${cfg.workDir}${c.reset}`);
+    if (cfg.agentHome) log.info(`Ajan alani: ${c.yellow}${cfg.agentHome}${c.reset}`);
     log.info(`Guvenlik : ${cfg.securityEnabled !== false ? c.green + "ACIK" : c.red + "KAPALI"}${c.reset}`);
     log.info(`App acma : ${cfg.allowAppLaunch === true ? c.green + "ACIK" : c.red + "KAPALI"}${c.reset}`);
     log.info(`API cagrilari : ${cfg.allowApiCalls === true ? c.green + "ACIK" : c.red + "KAPALI"}${c.reset}`);
@@ -96,6 +113,7 @@ async function main() {
         if (t === "--setup") {
             clearHistory();
             cfg = await setup(rl);
+            resolveAgentHome(cfg);
             refreshRuntime();
             printBanner(cfg.workDir);
             return true;
@@ -115,7 +133,8 @@ async function main() {
             if (message) log.ai(message, cfg.provider);
 
             if (command) {
-                const ok = await requestApproval(command, rl, cfg.workDir);
+                const needsApproval = shouldRequireApproval(command, cfg.workDir, cfg.agentHome);
+                const ok = needsApproval ? await requestApproval(command, rl, cfg.workDir, cfg.agentHome) : true;
                 if (ok) {
                     try {
                         log.info("Calistiriliyor...");

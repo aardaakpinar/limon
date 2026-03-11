@@ -36,6 +36,12 @@ fi
 cd "${INSTALL_DIR}"
 npm install --omit=dev
 
+# Try to register the CLI globally via npm (best effort)
+set +e
+npm link >/dev/null 2>&1
+LINK_STATUS=$?
+set -e
+
 mkdir -p "${BIN_DIR}"
 cat > "${BIN_DIR}/limon" <<EOF
 #!/usr/bin/env bash
@@ -46,6 +52,11 @@ chmod +x "${BIN_DIR}/limon"
 echo
 echo "Kurulum tamamlandi."
 echo "Komut: ${BIN_DIR}/limon"
+if [ "${LINK_STATUS}" -eq 0 ]; then
+    echo "npm link: OK"
+else
+    echo "npm link: Atlandi (wrapper kullaniliyor)."
+fi
 
 case ":$PATH:" in
     *":${BIN_DIR}:"*) ;;

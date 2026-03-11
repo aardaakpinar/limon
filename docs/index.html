@@ -44,7 +44,7 @@
                 </h1>
 
                 <p class="mt-6 max-w-2xl mx-auto text-lg text-white/60">
-                    Gemini, Claude ve OpenAI modellerini güvenli sandbox ortamında birleştir. Komutları sen onayla, AI yürütsün.
+                    Gemini, Claude ve OpenAI modellerini güvenli sandbox ortamında birleştir. Kendi alanında özgür, dışarıda onaylı.
                 </p>
 
                 <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
@@ -66,10 +66,12 @@
                             <span class="ml-2 text-xs text-white/40 font-mono">limon ~ terminal</span>
                         </div>
                         <div class="px-6 py-5 font-mono text-sm text-left space-y-2">
-                            <div><span class="text-limon">$</span> limon "Yeni bir React projesi oluştur"</div>
-                            <div class="text-white/50">&gt; Proje yapısı oluşturuluyor...</div>
-                            <div class="text-white/50">&gt; Bağımlılıklar yükleniyor...</div>
-                            <div class="text-green-400">[ONAY] npm install çalıştırılsın mı? (e/h)</div>
+                            <div><span class="text-limon">$</span> limon "Yeni bir dosya oluştur"</div>
+                            <div class="text-white/50">&gt; Çalışma alanı: /home/limon</div>
+                            <div class="text-white/50">&gt; Dosya hazırlandı: /home/limon/README.md</div>
+                            <div class="text-white/50">&gt; Dış alan erişimi isteği: /etc/hosts</div>
+                            <div class="text-white/50">&gt; Önizleme için: less /etc/hosts</div>
+                            <div class="text-green-400">[ONAY] /etc/hosts düzenlensin mi? (e/h)</div>
                             <div>
                                 <span class="text-limon">$</span> e<span class="animate-pulse text-limon">_</span>
                             </div>
@@ -86,23 +88,23 @@
 
                 <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition">
-                        <h3 class="font-semibold mb-3">Güvenli Sandbox</h3>
-                        <p class="text-sm text-white/60">AI yalnızca izin verdiğin dizinde çalışır.</p>
+                        <h3 class="font-semibold mb-3">Kişisel Çalışma Alanı</h3>
+                        <p class="text-sm text-white/60">Örn: <span class="text-white/80">/home/limon</span> içinde dosya oluşturur ve düzenler, onay beklemez.</p>
                     </div>
 
                     <div class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition">
-                        <h3 class="font-semibold mb-3">Onay Mekanizması</h3>
-                        <p class="text-sm text-white/60">Her komut önce sana gösterilir.</p>
+                        <h3 class="font-semibold mb-3">Yetki Dışı Onay</h3>
+                        <p class="text-sm text-white/60">Kendi alanının dışına çıkarsa senden açık onay ister.</p>
                     </div>
 
                     <div class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition">
-                        <h3 class="font-semibold mb-3">Çoklu Model</h3>
-                        <p class="text-sm text-white/60">Gemini, Claude ve OpenAI desteği.</p>
+                        <h3 class="font-semibold mb-3">Dosya Önizleme</h3>
+                        <p class="text-sm text-white/60">Onaydan önce içeriği <span class="text-white/80">less</span> veya <span class="text-white/80">more</span> ile gösterir.</p>
                     </div>
 
                     <div class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition">
-                        <h3 class="font-semibold mb-3">Kod & Terminal</h3>
-                        <p class="text-sm text-white/60">Dosya ve komut yönetimi tek yerden.</p>
+                        <h3 class="font-semibold mb-3">Net Sınırlar</h3>
+                        <p class="text-sm text-white/60">Kritik işlemler görünür; karar her zaman sende.</p>
                     </div>
                 </div>
             </div>
