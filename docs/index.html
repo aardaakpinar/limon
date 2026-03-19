@@ -118,7 +118,19 @@
                 <div class="space-y-6 text-left">
                     <p class="text-white/60">LiMON'u kurmak için aşağıdaki adımları izleyin:</p>
                     <div class="p-6 rounded-xl border border-white/10 bg-white/5">
-                        <code class="text-limon" id="install">curl -fsSL http://aardaakpinar.github.io/limon/install.sh | bash</code>
+                        <code class="text-limon" id="install">git clone https://github.com/aardaakpinar/limon.git</code>
+                    </div>
+
+                    <div class="p-6 rounded-xl border border-white/10 bg-white/5">
+                        <code class="text-limon" id="install">cd limon</code>
+                    </div>
+
+                    <div class="p-6 rounded-xl border border-white/10 bg-white/5">
+                        <code class="text-limon" id="install">npm install</code>
+                    </div>
+
+                    <div class="p-6 rounded-xl border border-white/10 bg-white/5">
+                        <code class="text-limon" id="install">npm start</code>
                     </div>
                 </div>
             </div>
@@ -129,27 +141,5 @@
             <p>2026 LiMON. Açık Kaynak.</p>
         </footer>
         <script async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
-        <script>
-            const getOS = () => {
-                const { userAgent } = window.navigator;
-                
-                if (userAgent.indexOf("Win") !== -1) return "Windows";
-                if (userAgent.indexOf("Mac") !== -1) return "MacOS";
-                if (userAgent.indexOf("Linux") !== -1) return "Linux";
-
-                return "Unknown OS";
-            };
-
-            const os = getOS();
-            const installEl = document.getElementById("install");
-
-            if (installEl) {
-                if (os === "Windows") {
-                    installEl.innerText = "iwr -useb http://aardaakpinar.github.io/limon/install.ps1 | iex";
-                } else {
-                    installEl.innerText = "curl -fsSL http://aardaakpinar.github.io/limon/install.sh | bash";
-                }
-            }
-        </script>
     </body>
 </html>
