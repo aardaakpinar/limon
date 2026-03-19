@@ -445,14 +445,6 @@ node index.js --setup
 - **API Çağrısı**: 1-5 saniye (ağ bağlı)
 - **Komut Çalıştırma**: 1-10 saniye (komut bağlı)
 
-## 📚 Detaylı Dokümantasyon
-
-- **[INDEX.md](./INDEX.md)** - Dökümentasyon navigasyon rehberi
-- **[QUICKSTART.md](./QUICKSTART.md)** - 5 dakikalık kurulum
-- **[SYSTEM_INFO_INTEGRATION.md](./SYSTEM_INFO_INTEGRATION.md)** - Sistem bilgisi detayları
-- **[OLLAMA_INTEGRATION.md](./OLLAMA_INTEGRATION.md)** - Ollama rehberi
-- **[README_UPDATES.md](./README_UPDATES.md)** - Tüm değişiklikler
-
 ## 🤝 Katkıda Bulunma
 
 Katkılar her zaman hoştur!

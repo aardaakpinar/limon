@@ -118,13 +118,8 @@
                 <div class="space-y-6 text-left">
                     <p class="text-white/60">LiMON'u kurmak için aşağıdaki adımları izleyin:</p>
                     <div class="p-6 rounded-xl border border-white/10 bg-white/5">
-                        <code class="text-limon">curl -fsSL http://aardaakpinar.github.io/limon/install.sh | bash</code>
+                        <code class="text-limon" id="install">curl -fsSL http://aardaakpinar.github.io/limon/install.sh | bash</code>
                     </div>
-                    <p class="text-white/60">Kurulumdan sonra (gerekirse PATH ayarladıktan sonra):</p>
-                    <div class="p-6 rounded-xl border border-white/10 bg-white/5">
-                        <code class="text-limon">limon --setup</code>
-                    </div>
-                    
                 </div>
             </div>
         </section>
@@ -134,5 +129,27 @@
             <p>2026 LiMON. Açık Kaynak.</p>
         </footer>
         <script async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+        <script>
+            const getOS = () => {
+                const { userAgent } = window.navigator;
+                
+                if (userAgent.indexOf("Win") !== -1) return "Windows";
+                if (userAgent.indexOf("Mac") !== -1) return "MacOS";
+                if (userAgent.indexOf("Linux") !== -1) return "Linux";
+
+                return "Unknown OS";
+            };
+
+            const os = getOS();
+            const installEl = document.getElementById("install");
+
+            if (installEl) {
+                if (os === "Windows") {
+                    installEl.innerText = "iwr -useb http://aardaakpinar.github.io/limon/install.ps1 | iex";
+                } else {
+                    installEl.innerText = "curl -fsSL http://aardaakpinar.github.io/limon/install.sh | bash";
+                }
+            }
+        </script>
     </body>
 </html>

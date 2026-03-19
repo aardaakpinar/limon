@@ -1,14 +1,57 @@
 {
   "name": "limon",
-  "version": "1.0.0",
-  "description": "🍋 Limon AI Ajan — Gemini, Claude, ChatGPT destekli",
-  "main": "src/index.js",
-  "bin": {
-    "limon": "src/index.js"
+  "version": "1.1.0",
+  "description": "🍋 Terminal-based AI Agent",
+  "main": "index.js",
+  "type": "commonjs",
+  "author": "Limon Contributors",
+  "license": "GPL-3.0-only",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   },
   "scripts": {
-    "start": "node src/index.js",
-    "setup": "node src/index.js --setup"
+    "start": "node index.js",
+    "setup": "node index.js --setup",
+    "interactive": "node index.js",
+    "clear-history": "node index.js --clear",
+    "dev": "NODE_DEBUG=* node index.js --setup"
   },
-  "engines": { "node": ">=18.0.0" }
+  "keywords": [
+    "ai",
+    "agent",
+    "terminal",
+    "cli",
+    "ollama",
+    "gemini",
+    "claude",
+    "openai",
+    "automation"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aardaakpinar/limon.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aardaakpinar/limon/issues"
+  },
+  "homepage": "https://github.com/aardaakpinar/limon#readme",
+  "dependencies": {},
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "bin": {
+    "limon": "index.js"
+  },
+  "files": [
+    "index.js",
+    "setup.js",
+    "config.js",
+    "providers.js",
+    "executor.js",
+    "security.js",
+    "interaction.js",
+    "ui.js",
+    "README.md",
+    "LICENSE"
+  ]
 }
