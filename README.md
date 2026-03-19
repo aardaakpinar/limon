@@ -240,12 +240,12 @@ Limon **varsayılan olarak güvenlidir**:
 
 ### Koruma Mekanizmaları
 
-✅ **Path Sandbox**: Sadece belirlenen `workDir` dizini içinde işlem yapabilir
-✅ **Yasaklı Komutlar**: `rm -rf /`, `format C:` gibi tehlikeli komutlar engellenir
-✅ **Shell Syntax Kontrolleri**: Komut zincirleme (`&&`, `|`), path traversal (`../`) engellenir
-✅ **Komut Timeoutu**: Komutlar 30 saniyeden sonra durdurulur
-✅ **User Approval**: Sandbox dışı işlemler kullanıcı onayı gerektirir
-✅ **Logging**: Tüm işlemler kaydedilir
+- **Path Sandbox**: Sadece belirlenen `workDir` dizini içinde işlem yapabilir
+- **Yasaklı Komutlar**: `rm -rf /`, `format C:` gibi tehlikeli komutlar engellenir
+- **Shell Syntax Kontrolleri**: Komut zincirleme (`&&`, `|`), path traversal (`../`) engellenir
+- **Komut Timeoutu**: Komutlar 30 saniyeden sonra durdurulur
+- **User Approval**: Sandbox dışı işlemler kullanıcı onayı gerektirir
+- **Logging**: Tüm işlemler kaydedilir
 
 ### Yasaklı Komutlar
 
