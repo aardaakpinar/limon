@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /**
  * Limon terminal agent
  */
@@ -11,7 +9,7 @@ const { loadConfig } = require("./config");
 const { printBanner, log, c } = require("./ui");
 const { setup } = require("./setup");
 const { CommandExecutor } = require("./executor");
-const { askGemini, askClaude, askOpenAI, clearHistory } = require("./providers");
+const { askGemini, askClaude, askOpenAI, askOllama, clearHistory } = require("./providers");
 const { requestApproval, shouldRequireApproval } = require("./interaction");
 const { isPathWithin } = require("./security");
 
@@ -59,7 +57,7 @@ function resolveAgentHome(cfg) {
 }
 
 function getAskFn(provider) {
-    const askFn = { gemini: askGemini, claude: askClaude, openai: askOpenAI }[provider];
+    const askFn = { gemini: askGemini, claude: askClaude, openai: askOpenAI, ollama: askOllama }[provider];
     if (!askFn) throw new Error("Desteklenmeyen provider: " + provider);
     return askFn;
 }
@@ -128,7 +126,13 @@ async function main() {
 
         try {
             log.info("Dusunuyor...");
-            const { message, command } = await askFn(t, runtimeApiKey, cfg.workDir);
+            let result;
+            if (cfg.provider === "ollama") {
+                result = await askFn(t, cfg, cfg.workDir);
+            } else {
+                result = await askFn(t, runtimeApiKey, cfg.workDir);
+            }
+            const { message, command } = result;
 
             if (message) log.ai(message, cfg.provider);
 

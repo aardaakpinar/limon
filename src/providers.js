@@ -5,9 +5,88 @@
 const history = [];
 const MAX_HISTORY_ITEMS = 20;
 
+// Ollama desteği
+async function askOllama(userMessage, config, workDir) {
+    history.push({ role: "user", content: userMessage });
+    trimHistory(false);
+
+    const { ollamaPort = 11434, ollamaModel } = config;
+    const url = `http://localhost:${ollamaPort}/api/generate`;
+
+    try {
+        const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                model: ollamaModel,
+                prompt: `${buildSystemPrompt(workDir)}\n\nKullanıcı: ${userMessage}`,
+                stream: false,
+            }),
+        });
+
+        if (!res.ok) {
+            throw new Error(
+                `Ollama API hatası (${res.status}). Ollama çalışıyor mu? Port: ${ollamaPort}`
+            );
+        }
+
+        const data = await res.json();
+        const text = data.response || "";
+
+        history.push({ role: "assistant", content: text });
+        trimHistory(false);
+
+        return parseResponse(text);
+    } catch (e) {
+        if (e.message.includes("fetch")) {
+            throw new Error(
+                `Ollama bağlantı hatası. Ollama'nın localhost:${ollamaPort} adresinde çalışıyor olduğundan emin olun.`
+            );
+        }
+        throw e;
+    }
+}
+
+function getSystemInfo() {
+    const os = require("os");
+    const platform = process.platform;
+    
+    const platformMap = {
+        linux: "Linux",
+        darwin: "macOS",
+        win32: "Windows",
+        freebsd: "FreeBSD",
+    };
+    
+    const osName = platformMap[platform] || platform;
+    const arch = process.arch; // x64, arm64, ia32 vb.
+    const nodeVersion = process.version;
+    const homeDir = os.homedir();
+    
+    return {
+        os: osName,
+        arch: arch,
+        nodeVersion: nodeVersion,
+        homeDir: homeDir,
+        platform: platform,
+    };
+}
+
 function buildSystemPrompt(workDir) {
+    const sysInfo = getSystemInfo();
     return `Sen Limon adinda terminal tabanli bir AI asistansin.
 Yalnizca su sandbox dizininde islem yapabilirsin: ${workDir}
+
+SISTEM BILGISI:
+- İşletim Sistemi: ${sysInfo.os} (${sysInfo.arch})
+- Node.js: ${sysInfo.nodeVersion}
+- Ev Dizini: ${sysInfo.homeDir}
+- Platform: ${sysInfo.platform}
+
+KRITIK: Komutlar bu sisteme ozgu olmali!
+- Linux/macOS: ls, cat, mkdir, rm, etc.
+- Windows: dir, type, md, del, etc.
+- Shell komutlarinda gecerliliği kontrol et!
 
 ZORUNLU: Her yanitinda sadece gecerli bir JSON objesi dondur.
 
@@ -23,8 +102,10 @@ Dosya islemleri:
 {"message":"Aciklama","command":{"type":"file","action":"list","path":"."}}
 {"message":"Aciklama","command":{"type":"file","action":"move","path":"./a.txt","to":"./arsiv/a.txt"}}
 
-Shell komutu:
-{"message":"Aciklama","command":{"type":"shell","action":"Kisa aciklama","exec":"ls -la"}}
+Shell komutu (${sysInfo.os} icin gecerli):
+${sysInfo.os === "Windows" 
+    ? `{"message":"Aciklama","command":{"type":"shell","action":"Kisa aciklama","exec":"dir /s"}}` 
+    : `{"message":"Aciklama","command":{"type":"shell","action":"Kisa aciklama","exec":"ls -la"}}`}
 
 Uygulama acma:
 {"message":"Aciklama","command":{"type":"app","action":"Uygulama ac","app":"firefox","args":[]}}
@@ -33,7 +114,11 @@ KURALLAR:
 - Turkce yaz.
 - Sadece JSON dondur.
 - ../ kullanma, sandbox disina cikma.
-- Belirsiz durumda command:null don ve once aciklayici mesaj ver.`;
+- ${sysInfo.os === "Windows" 
+    ? "Arkaslash (\\\\) ve disket harfi (C:, D:) vb. kullan." 
+    : "Koseli slashları doğru kullan (/)"}
+- Belirsiz durumda command:null don ve once aciklayici mesaj ver.
+- Bu sistem ${sysInfo.os} - komutları buna uygun yaz!`;
 }
 
 async function askGemini(userMessage, apiKey, workDir) {
@@ -219,7 +304,9 @@ module.exports = {
     askGemini,
     askClaude,
     askOpenAI,
+    askOllama,
     parseResponse,
     clearHistory,
     buildSystemPrompt,
+    getSystemInfo,
 };
