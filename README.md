@@ -35,7 +35,7 @@ Yerel Ollama kullanan, terminal üzerinden çalışan, güvenli AI asistanı. Ke
 ollama serve
 
 # Başka terminal'de: Model indir
-ollama pull llama2
+ollama pull llama3.1:8b
 # Alternatifler: mistral, neural-chat, codellama
 ```
 
@@ -52,43 +52,17 @@ node index.js --setup
 # [1] Google Gemini
 # [2] Anthropic Claude
 # [3] OpenAI ChatGPT
-# [4] Ollama (lokal) ← Önerilen
+# [4] Ollama (lokal)
 
 # Seçim yap ve talimatları takip et
 ```
 
-### 3. Adım: İlk Sohbeti Başlat
-
 ```bash
-node index.js
-```
-
-```
-  Siz > Masaüstümde deneme.txt oluştur
-
-  Dusunuyor...
-
-  🍋 Limon [Llama2]
-  Masaüstünde deneme.txt dosyası oluşturuyorum...
-  ────────────────────────────────────────────────
-
-  Calistiriliyor...
-
-  Sonuc:
-  | Yazildi: /home/user/Desktop/deneme.txt
-
-  Tamamlandi.
-
-  Siz >
+npm install
+npm start
 ```
 
 ## 📖 Kullanım
-
-### İnteraktif Mod (Önerilen)
-
-```bash
-node index.js
-```
 
 Komutları yazabilirsiniz:
 
@@ -123,34 +97,6 @@ node index.js --clear
 # Çıkış komutu (interaktif modda)
 > --quit
 ```
-
-## 🖥️ Sistem Algılama
-
-Limon otomatik olarak işletim sisteminizi algılar ve uygun komutları kullanır:
-
-### Linux/macOS
-```
-SISTEM BİLGİSİ:
-- İşletim Sistemi: Linux (x64)
-- Node.js: v22.22.0
-- Ev Dizini: /home/user
-
-→ Komutlar: ls, mkdir, rm, chmod vb.
-→ Path: /home/user/Desktop/file.txt
-```
-
-### Windows
-```
-SISTEM BİLGİSİ:
-- İşletim Sistemi: Windows (x64)
-- Node.js: v22.22.0
-- Ev Dizini: C:\Users\user
-
-→ Komutlar: dir, md, del, icacls vb.
-→ Path: C:\Users\user\Desktop\file.txt
-```
-
-LLM otomatik olarak işletim sisteminize uygun komutlar yazacaktır!
 
 ## 🎯 Yapılabilecek İşlemler
 
@@ -199,7 +145,7 @@ Kurulum sırasında otomatik `~/.limon/config.json` dosyası oluşturulur:
   "allowApiCalls": true,
   "allowedApiDomains": [],
   "ollamaPort": 11434,
-  "ollamaModel": "llama2"
+  "ollamaModel": "llama3.1:8b"
 }
 ```
 
@@ -215,7 +161,7 @@ Kurulum sırasında otomatik `~/.limon/config.json` dosyası oluşturulur:
 | `allowAppLaunch` | Uygulama başlatma | true |
 | `allowApiCalls` | API çağrıları | true |
 | `ollamaPort` | Ollama sunucu portu | 11434 |
-| `ollamaModel` | Ollama model adı | llama2 |
+| `ollamaModel` | Ollama model adı | llama3.1:8b |
 
 ### Ortam Değişkenleri
 
@@ -228,7 +174,7 @@ export LIMON_OPENAI_API_KEY="sk-..."       # OpenAI key
 
 # Ollama
 export OLLAMA_HOST="http://localhost:11434"
-export OLLAMA_MODEL="llama2"
+export OLLAMA_MODEL="llama3.1:8b"
 
 # Debug
 export LIMON_DEBUG="true"
@@ -304,79 +250,93 @@ limon/
 
 ## 🚀 Ollama Model Seçimi
 
-### Hızlı (Düşük Bellek)
+Limon, farklı donanım seviyelerine uygun modern LLM modelleriyle çalışır. Model seçimi **performans, kalite ve sistem prompt uyumu** açısından kritiktir.
+
+### 🧠 En İyi Kalite (Yüksek Donanım)
+
 ```bash
-ollama pull neural-chat     # ~2.9 GB
-ollama pull openchat        # ~3.5 GB
+ollama pull llama3.1:70b
+ollama pull qwen2.5:32b-instruct
 ```
 
-### Dengeli (Önerilen)
+* ✅ En yüksek **system prompt uyumu**
+* ✅ En iyi reasoning ve tool-use performansı
+* ❗ Çok yüksek RAM/VRAM gerektirir (48GB+ önerilir)
+
+---
+
+### ⚖️ Dengeli (ÖNERİLEN ⭐)
+
 ```bash
-ollama pull mistral         # ~4.1 GB
-ollama pull llama2          # ~3.8 GB
+ollama pull qwen2.5:14b-instruct
+ollama pull mistral-nemo
 ```
 
-### Güçlü (Yüksek Kalite)
+* ✅ En iyi **fiyat/performans oranı**
+* ✅ System prompt’a güçlü sadakat
+* ✅ Agent (Limon gibi) kullanımında en stabil modeller
+
+👉 **Varsayılan öneri:**
+
+```json
+"ollamaModel": "qwen2.5:14b-instruct"
+```
+
+---
+
+### 💡 Hafif (Orta Sistemler)
+
 ```bash
-ollama pull llama2-uncensored  # ~7 GB
-ollama pull openhermes         # ~8 GB
+ollama pull llama3.1:8b
 ```
 
-### Türkçe İyi
+* ✅ Düşük RAM ile çalışır
+* ✅ Genel kullanım için yeterli
+* ❗ Uzun görevlerde prompt drift olabilir
+
+---
+
+### ⚠️ Çok Hafif (Sınırlı Kullanım)
+
 ```bash
-ollama pull neural-chat     # Türkçe çok iyi
+ollama pull llama3.2:3b
+ollama pull qwen2.5:3b-instruct
 ```
 
-## 🧪 Örnekler
+* ⚠️ System prompt uyumu zayıf
+* ⚠️ Agent davranışında tutarsızlık olabilir
+* ✅ Sadece düşük sistemler için
 
-### Örnek 1: Dosya Oluşturma
+---
 
-```
-Siz > Desktop'ta todo.txt oluştur ve "- İş 1\n- İş 2" yaz
+## 🎯 Model Seçim Rehberi
 
-🍋 Limon [Llama2]
-Todo dosyası oluşturuyorum...
+| Sistem           | Önerilen Model             |
+| ---------------- | -------------------------- |
+| 8–16 GB RAM      | llama3.1:8b                |
+| 16–32 GB RAM     | qwen2.5:14b-instruct ⭐     |
+| 32 GB+ RAM / GPU | qwen2.5:32b / llama3.1:70b |
 
-Calistiriliyor...
+---
 
-Sonuc:
-| Yazildi: /home/user/Desktop/todo.txt
+## 🧠 Kritik Bilgi: System Prompt Uyumu
 
-Tamamlandi.
-```
+Limon bir **AI agent** olduğu için model seçimi çok önemlidir.
 
-### Örnek 2: Dosya Okuma
+Büyük modeller:
 
-```
-Siz > README.md dosyasını oku ve ilk 10 satırını göster
+* Kurallara daha sadık kalır
+* Komutları daha doğru üretir
+* Daha az “halüsinasyon” yapar
 
-🍋 Limon [Llama2]
-README.md dosyasını okuyorum ve ilk satırları gösteriyorum...
+Küçük modeller:
 
-Calistiriliyor...
+* Kuralları unutabilir
+* Yanlış komut üretebilir
+* Güvenlik riskleri oluşturabilir
 
-Sonuc:
-| # Limon - Terminal Tabanlı AI Asistanı
-| Yerel Ollama kullanan, terminal üzerinden çalışan...
-| ...
-```
+👉 Bu yüzden **14B+ modeller önerilir**
 
-### Örnek 3: Sistem Bilgisi
-
-```
-Siz > sistem bilgisini göster
-
-🍋 Limon [Llama2]
-Sistem bilgisini alıyorum...
-
-Calistiriliyor...
-
-Sonuc:
-| Sistem: Linux
-| Mimarı: x64
-| Node.js: v22.22.0
-| Ev Dizini: /root
-```
 
 ## 🐛 Sorun Giderme
 
@@ -405,7 +365,7 @@ Ollama API hatası (500).
 **Çözüm:**
 ```bash
 # Modeli indir
-ollama pull llama2
+ollama pull llama3.1:8b
 
 # Yüklü modelleri listele
 ollama list
@@ -431,19 +391,6 @@ node index.js --setup
 2. Sandbox (`workDir`) içinde misiniz kontrol edin
 3. Path syntax'ı kontrol edin (Linux: `/`, Windows: `\`)
 4. Yasaklı komut listesini kontrol edin
-
-### "Performance sorunu"
-
-- Daha küçük model deneyin: `mistral` veya `neural-chat`
-- GPU'yu aktif edin
-- Ollama sunucusunu farklı portta çalıştırın
-
-## 📊 Performans Metrikleri
-
-- **LLM Yanıtı**: 2-5 saniye (model bağlı)
-- **Dosya İşlemi**: <100ms
-- **API Çağrısı**: 1-5 saniye (ağ bağlı)
-- **Komut Çalıştırma**: 1-10 saniye (komut bağlı)
 
 ## 🤝 Katkıda Bulunma
 
@@ -486,12 +433,3 @@ Detaylar için `LICENSE` dosyasına bakın.
 ## 🌟 Teşekkürler
 
 Limon'u kullanan ve geliştiren herkese teşekkürler!
-
----
-
-**Limon'u Başlatmaya Hazır Mısın?** 🍋
-
-```bash
-node index.js --setup    # Kurulumu başlat
-node index.js            # Sohbete başla
-```
