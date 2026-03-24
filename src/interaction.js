@@ -8,6 +8,7 @@ const { spawnSync } = require("child_process");
 const { c, hr } = require("./ui");
 const { question } = require("./setup");
 const { isPathWithin } = require("./security");
+const { openInEditor } = require("./editor");
 
 function isInAgentHome(absPath, agentHome) {
     if (!agentHome || !absPath) return false;
@@ -43,7 +44,12 @@ function previewWithPager(text) {
     return false;
 }
 
-function previewApprovalContent(cmd, absPath) {
+function previewApprovalContent(cmd, absPath, allowAppLaunch) {
+    if (allowAppLaunch && absPath && fs.existsSync(absPath)) {
+        const opened = openInEditor(absPath);
+        if (opened.ok) return true;
+    }
+
     let text = "";
     if (cmd && typeof cmd.content === "string" && cmd.content.length) {
         text = cmd.content;
@@ -54,7 +60,7 @@ function previewApprovalContent(cmd, absPath) {
     return previewWithPager(text);
 }
 
-async function requestApproval(cmd, rl, workDir, agentHome) {
+async function requestApproval(cmd, rl, workDir, agentHome, allowAppLaunch) {
     console.log();
     console.log(`  ${c.yellow}KOMUT ONAY GEREKTIRIYOR${c.reset}`);
     console.log("  " + hr("."));
@@ -80,8 +86,9 @@ async function requestApproval(cmd, rl, workDir, agentHome) {
     }
 
     if (cmd.type === "file" && absPath && !isInAgentHome(absPath, agentHome)) {
-        console.log(`  ${c.yellow}Onizleme:${c.reset} ${c.gray}(less/more)${c.reset}`);
-        const ok = previewApprovalContent(cmd, absPath);
+        const previewHint = allowAppLaunch ? "(editor)" : "(less/more)";
+        console.log(`  ${c.yellow}Onizleme:${c.reset} ${c.gray}${previewHint}${c.reset}`);
+        const ok = previewApprovalContent(cmd, absPath, allowAppLaunch);
         if (!ok) {
             let fallbackText = "";
             if (cmd.content) fallbackText = String(cmd.content);

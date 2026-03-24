@@ -1,7 +1,6 @@
 /**
  * Limon terminal agent
  */
-
 const readline = require("readline");
 const fs = require("fs");
 const path = require("path");
@@ -11,6 +10,7 @@ const { setup } = require("./setup");
 const { CommandExecutor } = require("./executor");
 const { askGemini, askClaude, askOpenAI, askOllama, clearHistory } = require("./providers");
 const { requestApproval, shouldRequireApproval } = require("./interaction");
+const { openInEditor } = require("./editor");
 const { isPathWithin } = require("./security");
 
 function parseCliArgs(argv) {
@@ -138,16 +138,34 @@ async function main() {
 
             if (command) {
                 const needsApproval = shouldRequireApproval(command, cfg.workDir, cfg.agentHome);
-                const ok = needsApproval ? await requestApproval(command, rl, cfg.workDir, cfg.agentHome) : true;
+                const ok = needsApproval
+                    ? await requestApproval(command, rl, cfg.workDir, cfg.agentHome, cfg.allowAppLaunch === true)
+                    : true;
                 if (ok) {
                     try {
                         log.info("Calistiriliyor...");
                         const out = await executor.execute(command);
-                        console.log(`\n  ${c.green}Sonuc:${c.reset}`);
-                        String(out)
-                            .split("\n")
-                            .forEach((l) => console.log(`  ${c.gray}|${c.reset} ${l}`));
-                        console.log();
+                        if (command.type === "file" && command.action === "read" && cfg.allowAppLaunch === true) {
+                            const absPath = path.resolve(cfg.workDir, command.path);
+                            const opened = openInEditor(absPath);
+                            if (opened.ok) {
+                                console.log(`\n  ${c.green}Sonuc:${c.reset}`);
+                                console.log(`  ${c.gray}|${c.reset} Editor acildi: ${absPath}`);
+                                console.log();
+                            } else {
+                                console.log(`\n  ${c.green}Sonuc:${c.reset}`);
+                                String(out)
+                                    .split("\n")
+                                    .forEach((l) => console.log(`  ${c.gray}|${c.reset} ${l}`));
+                                console.log();
+                            }
+                        } else {
+                            console.log(`\n  ${c.green}Sonuc:${c.reset}`);
+                            String(out)
+                                .split("\n")
+                                .forEach((l) => console.log(`  ${c.gray}|${c.reset} ${l}`));
+                            console.log();
+                        }
                         log.success("Tamamlandi.");
                     } catch (e) {
                         if (e.isBlocked) log.blocked(e.message);

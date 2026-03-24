@@ -4,7 +4,6 @@
 
 const fs = require("fs");
 const path = require("path");
-const os = require("os");
 const { saveConfig } = require("./config");
 const { DEFAULT_BLOCKED } = require("./security");
 const { log, c, hr } = require("./ui");

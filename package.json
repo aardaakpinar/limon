@@ -11,11 +11,11 @@
     "npm": ">=9.0.0"
   },
   "scripts": {
-    "start": "node index.js",
-    "setup": "node index.js --setup",
-    "interactive": "node index.js",
-    "clear-history": "node index.js --clear",
-    "dev": "NODE_DEBUG=* node index.js --setup"
+    "start": "node src/index.js",
+    "setup": "node src/index.js --setup",
+    "interactive": "node src/index.js",
+    "clear-history": "node src/index.js --clear",
+    "dev": "NODE_DEBUG=* node src/index.js --setup"
   },
   "keywords": [
     "ai",
@@ -36,9 +36,9 @@
     "url": "https://github.com/aardaakpinar/limon/issues"
   },
   "homepage": "https://github.com/aardaakpinar/limon#readme",
-  "dependencies": {},
-  "devDependencies": {},
-  "optionalDependencies": {},
+  "dependencies": {
+    "ollama": "^0.6.3"
+  },
   "bin": {
     "limon": "index.js"
   },
