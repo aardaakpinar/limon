@@ -1,49 +1,51 @@
 /**
  * AI providers
  */
+const { Ollama } = require("ollama");
 
 const history = [];
 const MAX_HISTORY_ITEMS = 20;
 
-// Ollama desteği
+// 🔥 client (EN ÖNEMLİ KISIM)
+const ollama = new Ollama({
+    host: "http://127.0.0.1:11434", // localhost yerine bunu kullan!
+});
+
+// Ollama
 async function askOllama(userMessage, config, workDir) {
+    const { ollamaModel = "llama2:latest" } = config;
+
     history.push({ role: "user", content: userMessage });
     trimHistory(false);
 
-    const { ollamaPort = 11434, ollamaModel } = config;
-    const url = `http://localhost:${ollamaPort}/api/generate`;
-
     try {
-        const res = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                model: ollamaModel,
-                prompt: `${buildSystemPrompt(workDir)}\n\nKullanıcı: ${userMessage}`,
-                stream: false,
-            }),
+        const response = await ollama.chat({
+            model: ollamaModel,
+            messages: [
+                {
+                    role: "system",
+                    content: buildSystemPrompt(workDir),
+                },
+                ...history,
+            ],
+
+            format: "json",   // 🔥 SENİN SİSTEM İÇİN ÇOK ÖNEMLİ
+            stream: false,
         });
 
-        if (!res.ok) {
-            throw new Error(
-                `Ollama API hatası (${res.status}). Ollama çalışıyor mu? Port: ${ollamaPort}`
-            );
-        }
-
-        const data = await res.json();
-        const text = data.response || "";
+        const text = response?.message?.content?.trim() || "";
 
         history.push({ role: "assistant", content: text });
         trimHistory(false);
 
         return parseResponse(text);
+
     } catch (e) {
-        if (e.message.includes("fetch")) {
-            throw new Error(
-                `Ollama bağlantı hatası. Ollama'nın localhost:${ollamaPort} adresinde çalışıyor olduğundan emin olun.`
-            );
-        }
-        throw e;
+        console.error("OLLAMA FULL ERROR:", e);
+
+        throw new Error(
+            `Ollama hatası: ${e.message || "bilinmeyen hata"}`
+        );
     }
 }
 
