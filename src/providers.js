@@ -1,53 +1,7 @@
-/**
+﻿/**
  * AI providers
  */
 const { Ollama } = require("ollama");
-
-const history = [];
-const MAX_HISTORY_ITEMS = 20;
-
-// 🔥 client (EN ÖNEMLİ KISIM)
-const ollama = new Ollama({
-    host: "http://127.0.0.1:11434", // localhost yerine bunu kullan!
-});
-
-// Ollama
-async function askOllama(userMessage, config, workDir) {
-    const { ollamaModel = "llama2:latest" } = config;
-
-    history.push({ role: "user", content: userMessage });
-    trimHistory(false);
-
-    try {
-        const response = await ollama.chat({
-            model: ollamaModel,
-            messages: [
-                {
-                    role: "system",
-                    content: buildSystemPrompt(workDir),
-                },
-                ...history,
-            ],
-
-            format: "json",   // 🔥 SENİN SİSTEM İÇİN ÇOK ÖNEMLİ
-            stream: false,
-        });
-
-        const text = response?.message?.content?.trim() || "";
-
-        history.push({ role: "assistant", content: text });
-        trimHistory(false);
-
-        return parseResponse(text);
-
-    } catch (e) {
-        console.error("OLLAMA FULL ERROR:", e);
-
-        throw new Error(
-            `Ollama hatası: ${e.message || "bilinmeyen hata"}`
-        );
-    }
-}
 
 function getSystemInfo() {
     const os = require("os");
@@ -56,12 +10,11 @@ function getSystemInfo() {
     const platformMap = {
         linux: "Linux",
         darwin: "macOS",
-        win32: "Windows",
-        freebsd: "FreeBSD",
+        win32: "Windows"
     };
     
     const osName = platformMap[platform] || platform;
-    const arch = process.arch; // x64, arm64, ia32 vb.
+    const arch = process.arch;
     const nodeVersion = process.version;
     const homeDir = os.homedir();
     
@@ -121,6 +74,50 @@ KURALLAR:
     : "Koseli slashları doğru kullan (/)"}
 - Belirsiz durumda command:null don ve once aciklayici mesaj ver.
 - Bu sistem ${sysInfo.os} - komutları buna uygun yaz!`;
+}
+
+const history = [];
+const MAX_HISTORY_ITEMS = 20;
+
+const ollama = new Ollama({
+    host: "http://127.0.0.1:11434",
+});
+
+async function askOllama(userMessage, config, workDir) {
+    const { ollamaModel = "llama2:latest" } = config;
+
+    history.push({ role: "user", content: userMessage });
+    trimHistory(false);
+
+    try {
+        const response = await ollama.chat({
+            model: ollamaModel,
+            messages: [
+                {
+                    role: "system",
+                    content: buildSystemPrompt(workDir),
+                },
+                ...history,
+            ],
+
+            format: "json",   // 🔥 SENİN SİSTEM İÇİN ÇOK ÖNEMLİ
+            stream: false,
+        });
+
+        const text = response?.message?.content?.trim() || "";
+
+        history.push({ role: "assistant", content: text });
+        trimHistory(false);
+
+        return parseResponse(text);
+
+    } catch (e) {
+        console.error("OLLAMA FULL ERROR:", e);
+
+        throw new Error(
+            `Ollama hatası: ${e.message || "bilinmeyen hata"}`
+        );
+    }
 }
 
 async function askGemini(userMessage, apiKey, workDir) {
