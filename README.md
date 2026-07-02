@@ -10,30 +10,7 @@ Dosya okur/yazar, kabuk komutları çalıştırır; her işlem için otomatik bi
 
 Desteklenen sağlayıcılar: **ChatGPT (OpenAI)** · **Gemini (Google)** · **Claude (Anthropic)** · **Ollama (yerel)**
 
-```
-$ limon
-  ██╗     ██╗███╗   ███╗ ██████╗ ███╗   ██╗
-  ██║     ██║████╗ ████║██╔═══██╗████╗  ██║
-  ██║     ██║██╔████╔██║██║   ██║██╔██╗ ██║
-  ██║     ██║██║╚██╔╝██║██║   ██║██║╚██╗██║
-  ███████╗██║██║ ╚═╝ ██║╚██████╔╝██║ ╚████║
-  ╚══════╝╚═╝╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
-
-> bugünkü tarih nedir?
-🕒 get_current_datetime
-2026-06-27 ... (Cumartesi, 27 Haziran 2026)
-
-> /home/user/proje/main.py dosyasındaki hataları bul ve düzelt
-📄 read_file /home/user/proje/main.py
-✏️ write_file /home/user/proje/main.py  💾 Yedek alındı
-✓ 1 hata düzeltildi.
-
-> sistemdeki tüm .log dosyalarını sil
-⚠ ONAY GEREKİYOR  [████░░░░░░] 4/10
-  🖥️ run_command find / -name "*.log" -delete
-  Sebep: Sistem dizinine erişim: /
-  Devam edilsin mi? [evet / hayır]:
-```
+![](docs/screenshot.png)
 
 ## İçindekiler
 
