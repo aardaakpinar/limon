@@ -1,13 +1,51 @@
-node_modules/
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# --- Sanal ortamlar ---
+.venv/
+venv/
+env/
+ENV/
+.venv-*/
+
+# --- Paketleme / build ---
+build/
 dist/
+*.egg-info/
+*.egg
+.eggs/
+wheels/
+
+# --- Test / coverage / cache ---
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- Proje çalışma zamanı dosyaları (kesinlikle commit edilmemeli) ---
+# limon'un otomatik yedekleme klasörü ve yerel config'in yanlışlıkla
+# repo içine düşmesi ihtimaline karşı (normalde ~/.config/limon içinde olur)
+.limon_backups/
+**/.limon_backups/
+config.json
 .env
-.env.local
-firebase-key.json
-package-lock.json
-*.log
-npm-debug.log*
-.DS_Store
+.env.*
+*.key
+
+# --- Editör / IDE ---
+.vscode/
 .idea/
 *.swp
 *.swo
-*~
+
+# --- İşletim sistemi ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Loglar ---
+*.log

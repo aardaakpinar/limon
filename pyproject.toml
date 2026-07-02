@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "limon"
+version = "0.1.0"
+description = "Linux için, çoklu AI sağlayıcılı (ChatGPT/Gemini/Claude/Ollama) komut satırı asistanı"
+readme = "README.md"
+license = { text = "GPL-3.0-or-later" }
+requires-python = ">=3.9"
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "requests>=2.31.0",
+]
+
+[project.optional-dependencies]
+openai = ["openai>=1.30.0"]
+gemini = ["google-genai>=1.0.0"]
+claude = ["anthropic>=0.30.0"]
+all = ["openai>=1.30.0", "google-genai>=1.0.0", "anthropic>=0.30.0"]
+
+[project.scripts]
+limon = "limon.cli:entrypoint"
+
+[tool.setuptools]
+packages = ["limon", "limon.providers"]

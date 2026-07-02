@@ -1,435 +1,235 @@
-# 🍋 Limon - Terminal Tabanlı AI Asistanı
+# 🍋 limon
 
-Yerel Ollama kullanan, terminal üzerinden çalışan, güvenli AI asistanı. Kendi bilgisayarınızda çalışan kişisel AI ajanı.
+**Linux (ve Windows/macOS) için çoklu AI sağlayıcılı komut satırı asistanı.**
+Dosya okur/yazar, kabuk komutları çalıştırır; her işlem için otomatik bir
+**tehlike skoru** hesaplayıp riskli olanlarda kullanıcı onayı ister.
 
-![Version](https://img.shields.io/badge/Version-1.1.0-yellow)
-![Node.js](https://img.shields.io/badge/Node.js-18%2B-green)
-![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-blue)
-![License](https://img.shields.io/badge/License-GPLv3-blue)
+![Python](https://img.shields.io/badge/python-3.9%2B-blue)
+![License](https://img.shields.io/badge/license-GPL--3.0-blue)
+![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macOS%20%7C%20windows-lightgrey)
 
-## ✨ Özellikler
+Desteklenen sağlayıcılar: **ChatGPT (OpenAI)** · **Gemini (Google)** · **Claude (Anthropic)** · **Ollama (yerel)**
 
-- 🧠 **Yerel AI**: Ollama, Gemini, Claude, OpenAI desteği
-- 🎯 **Sistem Algılama**: Linux/macOS/Windows için otomatik OS-spesifik komutlar
-- 💻 **Komut Yürütme**: Terminal komutlarını güvenli şekilde çalıştır
-- 📁 **Dosya İşlemleri**: Oku, yaz, sil, taşı, kopyala, listele
-- 🌐 **API Çağrıları**: HTTP istekleri yap (GET, POST, PUT, DELETE)
-- 🔐 **Güvenli Sandbox**: Belirtilen dizin içinde sınırlı çalışma
-- ⚡ **Hızlı**: Yerel işleme, API latency yok
-- 🇹🇷 **Türkçe Arayüz**: Tamamen Türkçe komutlar ve çıktılar
+```
+$ limon
+  ██╗     ██╗███╗   ███╗ ██████╗ ███╗   ██╗
+  ██║     ██║████╗ ████║██╔═══██╗████╗  ██║
+  ██║     ██║██╔████╔██║██║   ██║██╔██╗ ██║
+  ██║     ██║██║╚██╔╝██║██║   ██║██║╚██╗██║
+  ███████╗██║██║ ╚═╝ ██║╚██████╔╝██║ ╚████║
+  ╚══════╝╚═╝╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
 
-## 🚀 Hızlı Başlangıç
+> bugünkü tarih nedir?
+🕒 get_current_datetime
+2026-06-27 ... (Cumartesi, 27 Haziran 2026)
 
-### Gereksinimler
+> /home/user/proje/main.py dosyasındaki hataları bul ve düzelt
+📄 read_file /home/user/proje/main.py
+✏️ write_file /home/user/proje/main.py  💾 Yedek alındı
+✓ 1 hata düzeltildi.
 
-- **Node.js** >= 18.0.0
-- **Ollama** (lokal AI için) - [indir](https://ollama.ai)
-- Veya API Key (Gemini, Claude, OpenAI için)
-
-### 1. Adım: Ollama Kurulumu (Opsiyonel)
-
-```bash
-# Ollama'yı indir ve kur (https://ollama.ai)
-
-# Ollama sunucusunu başlat
-ollama serve
-
-# Başka terminal'de: Model indir
-ollama pull llama3.1:8b
-# Alternatifler: mistral, neural-chat, codellama
+> sistemdeki tüm .log dosyalarını sil
+⚠ ONAY GEREKİYOR  [████░░░░░░] 4/10
+  🖥️ run_command find / -name "*.log" -delete
+  Sebep: Sistem dizinine erişim: /
+  Devam edilsin mi? [evet / hayır]:
 ```
 
-### 2. Adım: Limon Kurulumu
+## İçindekiler
+
+- [Nasıl çalışır?](#nasıl-çalışır)
+- [Kurulum](#kurulum)
+    - [Linux / macOS](#linux--macos)
+    - [Windows (PowerShell)](#windows-powershell)
+- [Yapılandırma](#yapılandırma)
+- [Kullanım](#kullanım)
+- [Ollama (yerel model) kullanımı](#ollama-yerel-model-kullanımı)
+- [Tehlike skoru nasıl hesaplanıyor?](#tehlike-skoru-nasıl-hesaplanıyor)
+- [Yeni araç eklemek](#yeni-araç-eklemek)
+- [Proje yapısı](#proje-yapısı)
+- [Güvenlik notları](#güvenlik-notları)
+- [Sorun giderme](#sorun-giderme)
+- [Katkıda bulunma](#katkıda-bulunma)
+- [Lisans](#lisans)
+
+## Nasıl çalışır?
+
+1. Kullanıcı bir istek yazar.
+2. Seçili AI sağlayıcısı (ChatGPT/Gemini/Claude/Ollama) cevap üretir; gerekirse
+   bir **araç çağrısı** (`read_file`, `write_file`, `delete_file`, `list_dir`,
+   `run_command`, `get_current_datetime`) döndürür.
+3. `limon`, çağrılan aracın komutunu/hedefini [`danger.py`](limon/danger.py)
+   içindeki kural listesine göre **0–10 arası bir tehlike skoruna** çevirir
+   (örn. `rm -rf`, `sudo`, `dd`, `/etc` altına yazma, `curl | bash` gibi
+   desenler puan katar).
+4. Skor eşiği (varsayılan **5**, `limon config` ile değiştirilebilir) geçerse
+   kullanıcıdan onay istenir; geçmezse işlem sessizce/otomatik çalışır.
+5. Dosya üzerine yazma/silme işlemlerinde **otomatik yedek** alınır
+   (`.limon_backups/` klasörüne).
+6. Araç sonucu tekrar modele gönderilir, model son cevabını verene kadar
+   bu döngü sürer; nihai cevap kullanıcıya gösterilir.
+
+## Kurulum
+
+### Linux / macOS
 
 ```bash
-# Depoyu klonla veya dosyaları indir
+git clone https://github.com/aardaakpinar/limon.git
 cd limon
-
-# Kurulumu başlat
-node index.js --setup
-
-# Kurulum menüsü açılacak:
-# [1] Google Gemini
-# [2] Anthropic Claude
-# [3] OpenAI ChatGPT
-# [4] Ollama (lokal)
-
-# Seçim yap ve talimatları takip et
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[all]"     # tüm sağlayıcı SDK'ları ile
 ```
+
+### Windows (PowerShell)
+
+```powershell
+git clone https://github.com/aardaakpinar/limon.git
+cd limon
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -e ".[all]"
+```
+
+> **Script çalıştırma engellenirse:** PowerShell varsayılan olarak imzasız
+> script'leri engelleyebilir. Şunu **tek başına, ayrı bir satırda** çalıştırıp
+> tekrar deneyin:
+>
+> ```powershell
+> Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
+> ```
+>
+> **`Activate.ps1 bulunamadı` hatası alırsanız:** `.venv` klasörü oluşmamış
+> demektir — `dir .venv\Scripts` ile kontrol edip gerekirse `python -m venv .venv`
+> komutunu tekrar çalıştırın (bazı sistemlerde `py -3 -m venv .venv` gerekebilir).
+
+Sadece belirli bir sağlayıcıyı kullanacaksanız daha az bağımlılık kurabilirsiniz:
 
 ```bash
-npm install
-npm start
+pip install -e ".[claude]"   # sadece Claude
+pip install -e ".[openai]"   # sadece ChatGPT
+pip install -e ".[gemini]"   # sadece Gemini
+# Ollama için ekstra paket gerekmez (yerel HTTP API kullanılır)
 ```
 
-## 📖 Kullanım
+Kurulumdan sonra `limon` komutu PATH'e eklenir (sanal ortam aktifken).
 
-Komutları yazabilirsiniz:
+## Yapılandırma
 
-```
-Siz > bir todo listesi oluştur
-Siz > proje dosyalarını listele
-Siz > config.json dosyasını oku
-Siz > sistem bilgisini göster
-```
-
-### Tek Seferlik Komut
+İlk çalıştırmada otomatik olarak kurulum sihirbazı açılır, ya da manuel:
 
 ```bash
-# -q veya --query ile
-node index.js -q "Masaüstündeki dosyaları listele"
-node index.js --query "Sistem bilgisini göster"
-
-# Veya direkt
-node index.js "Merhaba! Bugün nasılsın?"
+limon config
 ```
 
-### İleri Komutlar
+Bu sihirbaz şunları sorar:
+
+- Sağlayıcı: `openai` / `gemini` / `claude` / `ollama`
+- Model adı (ör. `gpt-4.1`, `gemini-flash-latest`, `claude-sonnet-4-6`, `llama3.1`)
+- API anahtarı (Ollama hariç) — veya ortam değişkeni de kullanılabilir:
+    - `OPENAI_API_KEY`, `GEMINI_API_KEY`, `ANTHROPIC_API_KEY`
+- Ollama kullanılıyorsa host adresi (varsayılan `http://localhost:11434`)
+- Tehlike onay eşiği (0–10)
+
+Ayarlar `~/.config/limon/config.json` içinde saklanır (izinler `600`,
+Windows'ta `%USERPROFILE%\.config\limon\config.json`). Bu dosya asla repoya
+commit edilmemelidir — `.gitignore` bunu zaten hariç tutuyor.
+
+## Kullanım
 
 ```bash
-# Kurulumu yeniden yapma
-node index.js --setup
-
-# Geçmiş temizle
-node index.js --temizle
-node index.js --clear
-
-# Çıkış komutu (interaktif modda)
-> --quit
+limon                              # etkileşimli REPL
+limon -p "bugünkü tarih nedir?"    # tek seferlik komut
 ```
 
-## 🎯 Yapılabilecek İşlemler
+REPL içinde:
 
-### 📁 Dosya İşlemleri
+- `/config` — ayarları yeniden aç
+- `/reset` — konuşma geçmişini sıfırla
+- `exit` / `quit` / `Ctrl+D` — çıkış
 
-```
-"Masaüstümde deneme.txt oluştur"
-"config.json dosyasını oku"
-"Tüm .log dosyalarını sil"
-"src klasörünü backup al"
-"file1.txt dosyasını file2.txt olarak kaydet"
-"Documents klasöründeki tüm PDF'leri listele"
-```
+## Ollama (yerel model) kullanımı
 
-### 💻 Komut Çalıştırma
-
-```
-"Sistem bilgisini göster"
-"Çalışan uygulamaları listele"
-"Disk kullanımını kontrol et"
-"Node.js sürümünü göster"
-"Ağ bağlantısını test et"
-```
-
-### 🌐 API Çağrıları
-
-```
-"GitHub API'sinden octocat bilgisini getir"
-"JSONPlaceholder API'sinden tüm postları indir"
-"Hava durumu API'sinden İstanbul'un hava durumunu al"
-"Kendi API'den veri çek"
-```
-
-## ⚙️ Yapılandırma
-
-Kurulum sırasında otomatik `~/.limon/config.json` dosyası oluşturulur:
-
-```json
-{
-  "provider": "ollama",
-  "apiKey": "",
-  "workDir": "/home/user/limon",
-  "agentHome": "/home/user/limon",
-  "securityEnabled": true,
-  "allowAppLaunch": true,
-  "allowApiCalls": true,
-  "allowedApiDomains": [],
-  "ollamaPort": 11434,
-  "ollamaModel": "llama3.1:8b"
-}
-```
-
-### Konfigürasyon Seçenekleri
-
-| Seçenek | Açıklama | Varsayılan |
-|---------|----------|-----------|
-| `provider` | AI sağlayıcı (gemini, claude, openai, ollama) | ollama |
-| `apiKey` | API anahtarı (Ollama için gerekli değil) | "" |
-| `workDir` | Çalışma dizini | /home/limon |
-| `agentHome` | Ajan ev dizini | /home/limon |
-| `securityEnabled` | Güvenlik kontrolleri | true |
-| `allowAppLaunch` | Uygulama başlatma | true |
-| `allowApiCalls` | API çağrıları | true |
-| `ollamaPort` | Ollama sunucu portu | 11434 |
-| `ollamaModel` | Ollama model adı | llama3.1:8b |
-
-### Ortam Değişkenleri
+Ollama'nın yerelde çalışıyor ve tool-calling destekleyen bir model
+(`llama3.1`, `qwen2.5`, `mistral-nemo` vb.) çekilmiş olması gerekir:
 
 ```bash
-# API Keys
-export LIMON_API_KEY="sk-..."              # Genel API key
-export LIMON_GEMINI_API_KEY="..."          # Gemini key
-export LIMON_CLAUDE_API_KEY="sk-ant-..."   # Claude key
-export LIMON_OPENAI_API_KEY="sk-..."       # OpenAI key
-
-# Ollama
-export OLLAMA_HOST="http://localhost:11434"
-export OLLAMA_MODEL="llama3.1:8b"
-
-# Debug
-export LIMON_DEBUG="true"
+ollama serve
+ollama pull llama3.1
+limon config     # sağlayıcı: ollama, model: llama3.1
 ```
 
-## 🔒 Güvenlik
+## Tehlike skoru nasıl hesaplanıyor?
 
-Limon **varsayılan olarak güvenlidir**:
+[`limon/danger.py`](limon/danger.py) içinde regex tabanlı bir kural listesi
+var: `rm -rf`, fork bomb, `mkfs`, `dd`, disk cihazına yazma, `sudo`,
+`chmod 777`, `curl | bash`, `git push --force`, `DROP TABLE`, sistem
+dizinlerine (`/etc`, `/boot`, `/root` vb.) erişim gibi onlarca desen
+puanlanmış durumda. Skorlar toplanır, üst sınır 10'dur. Kendi ortamınıza
+göre bu dosyayı düzenleyerek kuralları özelleştirebilirsiniz.
 
-### Koruma Mekanizmaları
+## Yeni araç eklemek
 
-- **Path Sandbox**: Sadece belirlenen `workDir` dizini içinde işlem yapabilir
-- **Yasaklı Komutlar**: `rm -rf /`, `format C:` gibi tehlikeli komutlar engellenir
-- **Shell Syntax Kontrolleri**: Komut zincirleme (`&&`, `|`), path traversal (`../`) engellenir
-- **Komut Timeoutu**: Komutlar 30 saniyeden sonra durdurulur
-- **User Approval**: Sandbox dışı işlemler kullanıcı onayı gerektirir
-- **Logging**: Tüm işlemler kaydedilir
+[`limon/tools.py`](limon/tools.py) içindeki `TOOL_DEFINITIONS` listesine yeni
+bir tanım ve `TOOL_IMPLEMENTATIONS` sözlüğüne karşılık gelen fonksiyonu
+eklemeniz yeterli — tüm sağlayıcılar bu ortak tanımı otomatik olarak kendi
+formatlarına çevirir.
 
-### Yasaklı Komutlar
-
-```
-- rm -rf / (Kök dizin silme)
-- format C: (Disk formatlama)
-- diskpart (Disk bölümleme)
-- mkfs (Dosya sistemi oluşturma)
-- nc -e (Reverse shell)
-- Metasploit (msfconsole, msfvenom)
-- ve daha fazlası...
-```
-
-### Engellenen Syntax
-
-```
-- Komut zincirleme: && || ;
-- Pipe: |
-- Komut ikamesi: ` $ ( )
-- Yönlendirme: < > >> 2>
-- Path traversal: ../
-```
-
-**⚠️ Uyarı**: `securityEnabled=false` yapmak tehlikelidir. Sadece **tamamen güvenilir ortamlarda** denemeler yapın.
-
-## 📁 Dosya Yapısı
+## Proje yapısı
 
 ```
 limon/
-├── index.js                  # Ana giriş noktası
-├── setup.js                  # Kurulum ve konfigürasyon
-├── config.js                 # Konfigürasyon dosyası yönetimi
-├── providers.js              # LLM provider'ları (Gemini, Claude, OpenAI, Ollama)
-├── executor.js               # Komut yürütücü
-├── security.js               # Güvenlik kontrolleri
-├── interaction.js            # Kullanıcı onayı ve etkileşimi
-├── ui.js                     # Terminal arayüzü ve renkler
-└── README.md                 # Bu dosya
-
-~/.limon/
-└── config.json               # Kullanıcı yapılandırması (otomatik oluşturulur)
+├── limon/
+│   ├── cli.py                 REPL, terminal UI, kurulum sihirbazı
+│   ├── agent.py                ana döngü: provider <-> tool <-> onay akışı
+│   ├── danger.py                tehlike skorlama kuralları
+│   ├── tools.py                  araç tanımları + uygulamaları (dosya/komut)
+│   ├── config.py                 ayar dosyası okuma/yazma
+│   └── providers/
+│       ├── base.py                ortak sağlayıcı arayüzü
+│       ├── openai_provider.py      ChatGPT (openai SDK)
+│       ├── gemini_provider.py      Gemini (google-genai SDK)
+│       ├── claude_provider.py      Claude (anthropic SDK)
+│       └── ollama_provider.py      Ollama (yerel HTTP API)
+├── pyproject.toml
+├── LICENSE
+└── .gitignore
 ```
 
-## 📊 Provider Karşılaştırması
-
-| Özellik | Gemini | Claude | OpenAI | Ollama |
-|---------|--------|--------|--------|--------|
-| API Gerekli | ✅ | ✅ | ✅ | ❌ |
-| Lokal | ❌ | ❌ | ❌ | ✅ |
-| Offline | ❌ | ❌ | ❌ | ✅ |
-| Ücretsiz Tier | ✅ | ❌ | ❌ | ✅ |
-| Hız | Orta | Hızlı | Hızlı | Değişken* |
-| Kurulum | Kolay | Kolay | Kolay | Orta |
-
-*GPU ile hızlı, CPU'da yavaş
-
-## 🚀 Ollama Model Seçimi
-
-Limon, farklı donanım seviyelerine uygun modern LLM modelleriyle çalışır. Model seçimi **performans, kalite ve sistem prompt uyumu** açısından kritiktir.
-
-### 🧠 En İyi Kalite (Yüksek Donanım)
-
-```bash
-ollama pull llama3.1:70b
-ollama pull qwen2.5:32b-instruct
-```
-
-* ✅ En yüksek **system prompt uyumu**
-* ✅ En iyi reasoning ve tool-use performansı
-* ❗ Çok yüksek RAM/VRAM gerektirir (48GB+ önerilir)
-
----
-
-### ⚖️ Dengeli (ÖNERİLEN ⭐)
-
-```bash
-ollama pull qwen2.5:14b-instruct
-ollama pull mistral-nemo
-```
-
-* ✅ En iyi **fiyat/performans oranı**
-* ✅ System prompt’a güçlü sadakat
-* ✅ Agent (Limon gibi) kullanımında en stabil modeller
-
-👉 **Varsayılan öneri:**
-
-```json
-"ollamaModel": "qwen2.5:14b-instruct"
-```
-
----
-
-### 💡 Hafif (Orta Sistemler)
-
-```bash
-ollama pull llama3.1:8b
-```
-
-* ✅ Düşük RAM ile çalışır
-* ✅ Genel kullanım için yeterli
-* ❗ Uzun görevlerde prompt drift olabilir
-
----
-
-### ⚠️ Çok Hafif (Sınırlı Kullanım)
-
-```bash
-ollama pull llama3.2:3b
-ollama pull qwen2.5:3b-instruct
-```
-
-* ⚠️ System prompt uyumu zayıf
-* ⚠️ Agent davranışında tutarsızlık olabilir
-* ✅ Sadece düşük sistemler için
-
----
-
-## 🎯 Model Seçim Rehberi
-
-| Sistem           | Önerilen Model             |
-| ---------------- | -------------------------- |
-| 8–16 GB RAM      | llama3.1:8b                |
-| 16–32 GB RAM     | qwen2.5:14b-instruct ⭐     |
-| 32 GB+ RAM / GPU | qwen2.5:32b / llama3.1:70b |
-
----
-
-## 🧠 Kritik Bilgi: System Prompt Uyumu
-
-Limon bir **AI agent** olduğu için model seçimi çok önemlidir.
-
-Büyük modeller:
-
-* Kurallara daha sadık kalır
-* Komutları daha doğru üretir
-* Daha az “halüsinasyon” yapar
-
-Küçük modeller:
-
-* Kuralları unutabilir
-* Yanlış komut üretebilir
-* Güvenlik riskleri oluşturabilir
-
-👉 Bu yüzden **14B+ modeller önerilir**
-
-
-## 🐛 Sorun Giderme
-
-### "Ollama bağlantı hatası"
-
-```
-Ollama bağlantı hatası. Ollama'nın localhost:11434 
-adresinde çalışıyor olduğundan emin olun.
-```
-
-**Çözüm:**
-```bash
-# Terminal 1: Ollama sunucusunu başlat
-ollama serve
-
-# Terminal 2: Limon'u çalıştır
-node index.js
-```
-
-### "Model bulunamadı"
-
-```
-Ollama API hatası (500).
-```
-
-**Çözüm:**
-```bash
-# Modeli indir
-ollama pull llama3.1:8b
-
-# Yüklü modelleri listele
-ollama list
-```
-
-### "API key gerekli"
-
-Eğer Gemini/Claude/OpenAI seçtiysen:
-
-```bash
-# API anahtarını al:
-# - Gemini: https://aistudio.google.com/app/apikey
-# - Claude: https://console.anthropic.com/settings/keys
-# - OpenAI: https://platform.openai.com/api-keys
-
-# Kurulumu yeniden yapma
-node index.js --setup
-```
-
-### "Komutlar çalışmıyor"
-
-1. `securityEnabled` kontrolü yapın
-2. Sandbox (`workDir`) içinde misiniz kontrol edin
-3. Path syntax'ı kontrol edin (Linux: `/`, Windows: `\`)
-4. Yasaklı komut listesini kontrol edin
-
-## 🤝 Katkıda Bulunma
-
-Katkılar her zaman hoştur!
-
-```bash
-# Fork edin, branch oluşturun
-git checkout -b feature/yeni-ozellik
-
-# Değişikliklerinizi yapın ve test edin
-git commit -am 'Yeni özellik: ...'
-
-# Push edin
-git push origin feature/yeni-ozellik
-
-# Pull Request açın
-```
-
-## 📝 Lisans
-
-Bu proje GNU General Public License v3.0 (GPL-3.0) ile lisanslanmıştır. 
-
-Detaylar için `LICENSE` dosyasına bakın.
-
-## 🍋 Neden "Limon"?
-
-- 🟡 Sarı renk (AI'nin sıcak ve dostça olması gibi)
-- 🔄 Modüler ve esneklik (limonun tazelik ve yenilik sembolü)
-- 🌍 Açık kaynak (herkesin kullanabileceği)
-- 💡 Terminal'de parlak ve renkli çıktı
-
-> "Hayata liman gibi yaklaşma, limon gibi yaklaş!" 🍋
-
-## 📞 İletişim & Destek
-
-- **Issues**: GitHub issues kullanarak hata rapor edin
-- **Discussions**: Soru ve önerileri tartışın
-- **Docs**: Belgeler için INDEX.md'ye bakın
-
-## 🌟 Teşekkürler
-
-Limon'u kullanan ve geliştiren herkese teşekkürler!
+## Güvenlik notları
+
+- `run_command` doğrudan `bash`/kabuk üzerinde çalışır; skorlama bir güvenlik
+  ağı sağlar ama **kusursuz değildir** — düzenli ifadelerle eşleşmeyen tehlikeli
+  komutlar olabilir. Kritik sistemlerde ekstra dikkatli olun ve düşük eşik
+  (`danger_threshold`) kullanın.
+- API anahtarlarınız yalnızca yerel `~/.config/limon/config.json` dosyasında
+  saklanır, hiçbir yere gönderilmez (sadece ilgili AI sağlayıcısına, isteklerin
+  bir parçası olarak).
+- Bu proje "olduğu gibi" sunulur; üretim/kritik sistemlerde kullanmadan önce
+  kendi risk toleransınıza göre `danger.py` kurallarını gözden geçirin.
+
+## Sorun giderme
+
+**`json.decoder.JSONDecodeError` / config açılmıyor** — config dosyası bozulmuş
+olabilir, `limon` bunu artık otomatik tespit edip varsayılana dönüyor
+(bozuk dosya `.corrupt` uzantısıyla yedeklenir). Hâlâ sorun yaşıyorsanız
+`~/.config/limon/config.json` dosyasını silip `limon config` ile yeniden kurun.
+
+**Gemini'de `thought_signature` hatası** — eski `google-generativeai` paketi
+kullanımdan kaldırıldı; bu proje güncel `google-genai` SDK'sını kullanıyor.
+`pip install -e ".[all]"` ile bağımlılıkları güncel tutun.
+
+**`Activate.ps1` bulunamadı (Windows)** — bkz. [Windows (PowerShell)](#windows-powershell)
+bölümündeki not.
+
+## Katkıda bulunma
+
+Katkılar memnuniyetle karşılanır! Yeni bir sağlayıcı, yeni bir araç ya da
+daha iyi tehlike kuralları eklemek isterseniz:
+
+1. Bu repoyu fork'layın
+2. Bir özellik dalı oluşturun (`git checkout -b ozellik/yeni-arac`)
+3. Değişikliklerinizi yapın ve mümkünse test edin
+4. Pull request açın
+
+Hata bildirimleri ve öneriler için Issues sekmesini kullanabilirsiniz.
