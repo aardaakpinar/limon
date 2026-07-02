@@ -50,7 +50,6 @@ $ limon
 - [Güvenlik notları](#güvenlik-notları)
 - [Sorun giderme](#sorun-giderme)
 - [Katkıda bulunma](#katkıda-bulunma)
-- [Lisans](#lisans)
 
 ## Nasıl çalışır?
 
