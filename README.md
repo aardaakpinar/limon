@@ -49,19 +49,37 @@ Desteklenen sağlayıcılar: **ChatGPT (OpenAI)** · **Gemini (Google)** · **Cl
 
 ### Linux / macOS
 
+Kolay kurulum için repo kökünde sağlanan betiği kullanabilirsiniz:
+
 ```bash
 git clone https://github.com/aardaakpinar/limon.git
 cd limon
+./install.sh           # varsayılan: .venv oluşturur ve tüm bağımlılıkları kurar
+./install.sh --extras all   # tüm sağlayıcı SDK'larını da kurar
+```
+
+Alternatif olarak manuel kurulum:
+
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e ".[all]"     # tüm sağlayıcı SDK'ları ile
+pip install -e ".[all]"
 ```
 
 ### Windows (PowerShell)
 
+Projede Windows için bir kurulum betiği bulunmaktadır; PowerShell'de çalıştırın:
+
 ```powershell
 git clone https://github.com/aardaakpinar/limon.git
 cd limon
+powershell -ExecutionPolicy Bypass -File .\install.ps1
+# veya extras ile: .\install.ps1 -Extras all
+```
+
+Alternatif (manuel):
+
+```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -e ".[all]"

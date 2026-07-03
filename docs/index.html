@@ -3,11 +3,8 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>LiMON</title>
-		<link
-			rel="shortcut icon"
-			href="https://aardaakpinar.github.io/assets/images/logos/limon.png"
-		/>
+		<title>Limon</title>
+		<link rel="shortcut icon" href="https://aardaakpinar.github.io/assets/images/logos/limon.png" />
 		<script src="https://cdn.tailwindcss.com"></script>
 		<script src="tailwind.config.js"></script>
 		<link rel="stylesheet" href="style.css" />
@@ -15,135 +12,61 @@
 
 	<body class="font-sans antialiased text-white overflow-x-hidden">
 		<!-- Navbar -->
-		<header
-			class="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/40 border-b border-white/5"
-		>
-			<nav
-				class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4"
-			>
+		<header class="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/40 border-b border-white/5">
+			<nav class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
 				<a href="" class="flex items-center gap-3 group">
-					<img
-						src="https://aardaakpinar.github.io/assets/images/logos/limon.png"
-						class="h-9 rounded-lg group-hover:scale-105 transition"
-						alt="LiMON Logo"
-					/>
-					<span class="text-xl font-bold tracking-tight text-limon"
-						>LiMON</span
-					>
+					<img src="https://aardaakpinar.github.io/assets/images/logos/limon.png" class="h-9 rounded-lg group-hover:scale-105 transition" alt="Limon Logo" />
+					<span class="text-xl font-bold tracking-tight text-limon">Limon</span>
 				</a>
 
-				<div
-					class="hidden md:flex items-center gap-6 text-sm text-white/70"
-				>
-					<a href="#ozellikler" class="hover:text-white transition"
-						>Özellikler</a
-					>
-					<a href="#kurulum" class="hover:text-white transition"
-						>Kurulum</a
-					>
-					<a
-						href="https://github.com/aardaakpinar/limon"
-						target="_blank"
-						class="ml-4 bg-limon text-black px-5 py-2 rounded-lg font-semibold hover:shadow-glow transition"
-					>
-						Hemen Başla
-					</a>
+				<div class="hidden md:flex items-center gap-6 text-sm text-white/70">
+					<a href="#ozellikler" class="hover:text-white transition">Özellikler</a>
+					<a href="#kurulum" class="hover:text-white transition">Kurulum</a>
+					<a href="https://github.com/aardaakpinar/limon" target="_blank" class="ml-4 bg-limon text-black px-5 py-2 rounded-lg font-semibold hover:shadow-glow transition"> Hemen Başla </a>
 				</div>
 			</nav>
 		</header>
 
 		<!-- Hero -->
-		<section
-			class="relative flex min-h-screen items-center justify-center pt-24 grid-bg"
-		>
-			<div
-				class="absolute top-1/3 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[400px] bg-limon/10 blur-[120px] rounded-full"
-			></div>
+		<section class="relative flex min-h-screen items-center justify-center pt-24 grid-bg">
+			<div class="absolute top-1/3 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[400px] bg-limon/10 blur-[120px] rounded-full"></div>
 
 			<div class="relative max-w-5xl px-6 text-center">
-				<span
-					class="inline-block mb-8 px-4 py-2 rounded-full border border-limon/30 bg-limon/10 text-limon text-sm"
-				>
-					Kontrollü Yapay Zeka Ajanı
-				</span>
+				<span class="inline-block mb-8 px-4 py-2 rounded-full border border-limon/30 bg-limon/10 text-limon text-sm"> Kontrollü Yapay Zeka Ajanı </span>
 
-				<h1
-					class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight"
-				>
+				<h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
 					AI çalışsın.<br />
 					<span class="text-limon">Kontrol sende kalsın.</span>
 				</h1>
 
 				<p class="mt-6 max-w-2xl mx-auto text-lg text-white/60">
-					Gemini, Claude ve OpenAI modellerini güvenli sandbox
-					ortamında birleştir. Kendi alanında özgür, dışarıda onaylı.
+					Gemini, Claude ve OpenAI modelleriyle etkileşim kurar; model araç çağrılarını proje içindeki tehlike kurallarına göre sınıflandırır ve riskli işlemler için kullanıcı onayı ister.
 				</p>
 
-				<div
-					class="mt-10 flex flex-col sm:flex-row justify-center gap-4"
-				>
-					<a
-						href="https://github.com/aardaakpinar/limon"
-						target="_blank"
-						class="bg-limon text-black px-8 py-3 rounded-lg font-semibold hover:brightness-110 hover:shadow-glow transition"
-					>
+				<div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
+					<a href="https://github.com/aardaakpinar/limon" target="_blank" class="bg-limon text-black px-8 py-3 rounded-lg font-semibold hover:brightness-110 hover:shadow-glow transition">
 						GitHub'dan Başla
 					</a>
-					<a
-						href="#kurulum"
-						class="border border-white/20 px-8 py-3 rounded-lg hover:bg-white/5 transition"
-					>
-						Kurulum Rehberi
-					</a>
+					<a href="#kurulum" class="border border-white/20 px-8 py-3 rounded-lg hover:bg-white/5 transition"> Kurulum Rehberi </a>
 				</div>
 
 				<!-- Terminal Demo -->
 				<div class="mt-16 max-w-2xl mx-auto animate-float">
-					<div
-						class="rounded-xl border border-white/10 bg-black/60 backdrop-blur-xl shadow-2xl overflow-hidden"
-					>
-						<div
-							class="flex items-center gap-2 px-4 py-3 border-b border-white/10"
-						>
-							<div
-								class="w-3 h-3 bg-red-500/60 rounded-full"
-							></div>
+					<div class="rounded-xl border border-white/10 bg-black/60 backdrop-blur-xl shadow-2xl overflow-hidden">
+						<div class="flex items-center gap-2 px-4 py-3 border-b border-white/10">
+							<div class="w-3 h-3 bg-red-500/60 rounded-full"></div>
 							<div class="w-3 h-3 bg-limon/70 rounded-full"></div>
-							<div
-								class="w-3 h-3 bg-green-500/60 rounded-full"
-							></div>
-							<span class="ml-2 text-xs text-white/40 font-mono"
-								>limon ~ terminal</span
-							>
+							<div class="w-3 h-3 bg-green-500/60 rounded-full"></div>
+							<span class="ml-2 text-xs text-white/40 font-mono">limon ~ terminal</span>
 						</div>
-						<div
-							class="px-6 py-5 font-mono text-sm text-left space-y-2"
-						>
-							<div>
-								<span class="text-limon">$</span> limon "Yeni
-								bir dosya oluştur"
-							</div>
-							<div class="text-white/50">
-								&gt; Çalışma alanı: /home/limon
-							</div>
-							<div class="text-white/50">
-								&gt; Dosya hazırlandı: /home/limon/README.md
-							</div>
-							<div class="text-white/50">
-								&gt; Dış alan erişimi isteği: /etc/hosts
-							</div>
-							<div class="text-white/50">
-								&gt; Önizleme için: less /etc/hosts
-							</div>
-							<div class="text-green-400">
-								[ONAY] /etc/hosts düzenlensin mi? (e/h)
-							</div>
-							<div>
-								<span class="text-limon">$</span> e<span
-									class="animate-pulse text-limon"
-									>_</span
-								>
-							</div>
+						<div class="px-6 py-5 font-mono text-sm text-left space-y-2">
+							<div><span class="text-limon">$</span> limon "Yeni bir dosya oluştur"</div>
+							<div class="text-white/50">&gt; Çalışma alanı: /home/limon</div>
+							<div class="text-white/50">&gt; Dosya hazırlandı: /home/limon/README.md</div>
+							<div class="text-white/50">&gt; Dış alan erişimi isteği: /etc/hosts</div>
+							<div class="text-white/50">&gt; Önizleme için: less /etc/hosts</div>
+							<div class="text-green-400">[ONAY] /etc/hosts düzenlensin mi? (e/h)</div>
+							<div><span class="text-limon">$</span> e<span class="animate-pulse text-limon">_</span></div>
 						</div>
 					</div>
 				</div>
@@ -153,17 +76,11 @@
 		<!-- Features -->
 		<section id="ozellikler" class="py-24 grid-bg">
 			<div class="max-w-6xl mx-auto px-6 text-center">
-				<h2 class="text-3xl md:text-5xl font-bold mb-16">
-					Neden LiMON?
-				</h2>
+				<h2 class="text-3xl md:text-5xl font-bold mb-16">Neden Limon?</h2>
 
 				<div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-					<div
-						class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition"
-					>
-						<h3 class="font-semibold mb-3">
-							Kişisel Çalışma Alanı
-						</h3>
+					<div class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition">
+						<h3 class="font-semibold mb-3">Kişisel Çalışma Alanı</h3>
 						<p class="text-sm text-white/60">
 							Örn:
 							<span class="text-white/80">/home/limon</span>
@@ -171,35 +88,22 @@
 						</p>
 					</div>
 
-					<div
-						class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition"
-					>
+					<div class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition">
 						<h3 class="font-semibold mb-3">Yetki Dışı Onay</h3>
-						<p class="text-sm text-white/60">
-							Kendi alanının dışına çıkarsa senden açık onay
-							ister.
-						</p>
+						<p class="text-sm text-white/60">Kendi alanının dışına çıkarsa senden açık onay ister.</p>
 					</div>
 
-					<div
-						class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition"
-					>
+					<div class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition">
 						<h3 class="font-semibold mb-3">Dosya Önizleme</h3>
 						<p class="text-sm text-white/60">
 							Onaydan önce içeriği
-							<span class="text-white/80">less</span> veya
-							<span class="text-white/80">more</span> ile
-							gösterir.
+							<span class="text-white/80">less</span> veya <span class="text-white/80">more</span> ile gösterir.
 						</p>
 					</div>
 
-					<div
-						class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition"
-					>
+					<div class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition">
 						<h3 class="font-semibold mb-3">Net Sınırlar</h3>
-						<p class="text-sm text-white/60">
-							Kritik işlemler görünür; karar her zaman sende.
-						</p>
+						<p class="text-sm text-white/60">Kritik işlemler görünür; karar her zaman sende.</p>
 					</div>
 				</div>
 			</div>
@@ -208,59 +112,75 @@
 		<!-- Kurulum -->
 		<section id="kurulum" class="py-24 grid-bg">
 			<div class="max-w-4xl mx-auto px-6 text-center">
-				<h2 class="text-3xl md:text-5xl font-bold mb-12">
-					Dakikalar içinde hazır
-				</h2>
+				<h2 class="text-3xl md:text-5xl font-bold mb-12">Dakikalar içinde hazır</h2>
 
 				<div class="space-y-6 text-left">
-					<p class="text-white/60">
-						LiMON'u kurmak için aşağıdaki adımları izleyin:
-					</p>
-					<div
-						class="p-6 rounded-xl border border-white/10 bg-white/5"
-					>
-						<code class="text-limon" id="install"
-							>pip install limon</code
-						>
+					<p class="text-white/60">Limon'u kurmak için işletim sisteminizi seçin:</p>
+
+					<!-- OS Tabs -->
+					<div class="flex gap-4 mb-8">
+						<button class="os-tab px-5 py-2 rounded-lg border border-white/10 bg-limon text-black font-medium" data-os="unix">Linux / macOS</button>
+
+						<button class="os-tab px-5 py-2 rounded-lg border border-white/10 bg-white/5 text-white/70" data-os="windows">Windows</button>
 					</div>
 
-					<div
-						class="p-6 rounded-xl border border-white/10 bg-white/5"
-					>
-						<code class="text-limon" id="install"
-							>limon config</code
-						>
+					<!-- Ortak Adımlar -->
+					<div class="p-6 rounded-xl border border-white/10 bg-white/5">
+						<code class="text-limon"> git clone https://github.com/aardaakpinar/limon.git && cd limon </code>
 					</div>
 
-					<div
-						class="p-6 rounded-xl border border-white/10 bg-white/5"
-					>
-						<code class="text-limon" id="install">limon</code>
+					<!-- Linux/macOS -->
+					<div class="os-content" id="unix-content">
+						<div class="p-6 rounded-xl border border-white/10 bg-white/5">
+							<code class="text-limon"> ./install.sh </code>
+						</div>
 					</div>
 
-					<div
-						class="mt-8 p-4 rounded-lg border border-white/10 bg-white/5"
-					>
-						<p class="text-sm text-white/60">
-							<span class="text-white">Kaldırmak için:</span>
-							<code class="text-limon">limon uninstall</code>
-							sonra
-							<code class="text-limon">pip uninstall limon</code>
-						</p>
+					<!-- Windows -->
+					<div class="os-content hidden" id="windows-content">
+						<div class="p-6 rounded-xl border border-white/10 bg-white/5">
+							<code class="text-limon"> powershell -ExecutionPolicy Bypass -File .\install.ps1 </code>
+						</div>
+					</div>
+
+					<!-- Ortak Adımlar -->
+					<div class="p-6 rounded-xl border border-white/10 bg-white/5">
+						<code class="text-limon">limon config</code>
+					</div>
+
+					<div class="p-6 rounded-xl border border-white/10 bg-white/5">
+						<code class="text-limon">limon</code>
 					</div>
 				</div>
 			</div>
 		</section>
 
+		<script>
+			const tabs = document.querySelectorAll(".os-tab");
+			const contents = document.querySelectorAll(".os-content");
+
+			tabs.forEach((tab) => {
+				tab.addEventListener("click", () => {
+					const selected = tab.dataset.os;
+
+					contents.forEach((content) => content.classList.add("hidden"));
+					document.getElementById(`${selected}-content`).classList.remove("hidden");
+
+					tabs.forEach((btn) => {
+						btn.classList.remove("bg-limon", "text-black");
+						btn.classList.add("bg-white/5", "text-white/70");
+					});
+
+					tab.classList.remove("bg-white/5", "text-white/70");
+					tab.classList.add("bg-limon", "text-black");
+				});
+			});
+		</script>
+
 		<!-- Footer -->
-		<footer
-			class="py-12 border-t border-white/10 text-center text-white/40"
-		>
-			<p>2026 LiMON. Açık Kaynak.</p>
+		<footer class="py-12 border-t border-white/10 text-center text-white/40">
+			<p>2026 Limon. Açık Kaynak.</p>
 		</footer>
-		<script
-			async
-			src="https://scripts.simpleanalyticscdn.com/latest.js"
-		></script>
+		<script async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
 	</body>
 </html>
