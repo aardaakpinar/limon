@@ -54,8 +54,11 @@ Kolay kurulum için repo kökünde sağlanan betiği kullanabilirsiniz:
 ```bash
 git clone https://github.com/aardaakpinar/limon.git
 cd limon
-./install.sh           # varsayılan: .venv oluşturur ve tüm bağımlılıkları kurar
-./install.sh --extras all   # tüm sağlayıcı SDK'larını da kurar
+./install.sh                  # varsayılan: .venv oluşturur ve temel bağımlılıkları kurar
+./install.sh --extras all     # tüm sağlayıcı SDK'larını da kurar
+./install.sh --extras claude  # sadece Claude SDK'sını kurar
+./install.sh --no-venv        # venv oluşturmadan mevcut Python ortamına kurar
+./install.sh --help           # tüm seçenekleri gösterir
 ```
 
 Alternatif olarak manuel kurulum:
@@ -74,7 +77,8 @@ Projede Windows için bir kurulum betiği bulunmaktadır; PowerShell'de çalış
 git clone https://github.com/aardaakpinar/limon.git
 cd limon
 powershell -ExecutionPolicy Bypass -File .\install.ps1
-# veya extras ile: .\install.ps1 -Extras all
+# veya extras ile:    .\install.ps1 -Extras all
+# venv olmadan:       .\install.ps1 -NoVenv
 ```
 
 Alternatif (manuel):
@@ -185,6 +189,9 @@ limon/
 │       ├── gemini_provider.py      Gemini (google-genai SDK)
 │       ├── claude_provider.py      Claude (anthropic SDK)
 │       └── ollama_provider.py      Ollama (yerel HTTP API)
+├── docs/                        proje web sayfası (GitHub Pages)
+├── install.sh                   Linux/macOS kolay kurulum betiği
+├── install.ps1                  Windows kolay kurulum betiği
 ├── pyproject.toml
 ├── LICENSE
 └── .gitignore
