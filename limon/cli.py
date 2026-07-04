@@ -34,7 +34,7 @@ BANNER = f"""
 {YELLOW}{BOLD}  ██║     ██║██║╚██╔╝██║██║   ██║██║╚██╗██║{RESET}
 {YELLOW}{BOLD}  ███████╗██║██║ ╚═╝ ██║╚██████╔╝██║ ╚████║{RESET}
 {YELLOW}{BOLD}  ╚══════╝╚═╝╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═══╝{RESET}
-{DIM}  Linux için AI komut asistanı{RESET}
+{DIM}  Senin için AI komut asistanı{RESET}
 """
 
 TOOL_ICONS = {
@@ -233,7 +233,7 @@ def uninstall():
 
 
 def main():
-    parser = argparse.ArgumentParser(prog="limon", description="Linux için AI komut asistanı")
+    parser = argparse.ArgumentParser(prog="limon", description="Senin için AI komut asistanı")
     sub = parser.add_subparsers(dest="command")
     sub.add_parser("config", help="Sağlayıcı / API anahtarı / eşik ayarlarını yapılandır")
     sub.add_parser("uninstall", help="Limon yapılandırmasını ve ayarlarını kaldır")
