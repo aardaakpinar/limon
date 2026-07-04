@@ -20,7 +20,7 @@ from .providers.base import BaseProvider, ToolCall
 MAX_TOOL_ITERATIONS = 12
 
 SYSTEM_PROMPT = """\
-Sen "limon" adlı bir Linux komut satırı asistanısın. Kullanıcının makinesinde \
+Sen "limon" adlı bir komut satırı asistanısın. Kullanıcının makinesinde \
 dosya okuma/yazma/silme ve kabuk (bash) komutu çalıştırma araçlarına erişimin var.
 
 Kurallar:
