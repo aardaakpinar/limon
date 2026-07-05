@@ -17,14 +17,12 @@
 .EXAMPLE
     .\install.ps1
 .EXAMPLE
-    .\install.ps1 -Extras all
-.EXAMPLE
     .\install.ps1 -Extras claude -VenvDir .venv2
 #>
 
 [CmdletBinding()]
 param(
-    [string]$Extras = "",
+    [string]$Extras = "all",
     [string]$VenvDir = ".venv",
     [switch]$NoVenv
 )
