@@ -3,19 +3,16 @@
 # limon - Linux/macOS kolay kurulum betiği
 #
 # Kullanım:
-#   ./install.sh                 -> .venv oluşturur, temel bağımlılıkları kurar
-#   ./install.sh --extras all    -> tüm sağlayıcı SDK'larını da kurar
-#   ./install.sh --extras claude -> sadece Claude SDK'sını kurar
-#   ./install.sh --extras openai -> sadece OpenAI SDK'sını kurar
-#   ./install.sh --extras gemini -> sadece Gemini SDK'sını kurar
-#   ./install.sh --venv-dir .venv2   -> farklı bir venv klasörü kullan
-#   ./install.sh --no-venv        -> venv oluşturmadan, mevcut Python ortamına kurar
-#   ./install.sh -h | --help      -> bu yardımı gösterir
+# ./install.sh                 -> .venv oluşturur ve tüm sağlayıcıları kurar (varsayılan)
+# ./install.sh --extras all    -> tüm sağlayıcı SDK'larını kurar
+# ./install.sh --extras claude -> sadece Claude SDK'sını kurar
+# ./install.sh --extras openai -> sadece OpenAI SDK'sını kurar
+# ./install.sh --extras gemini -> sadece Gemini SDK'sını kurar
 
 set -euo pipefail
 
 # --- Varsayılanlar ---------------------------------------------------------
-EXTRAS=""
+EXTRAS="all"
 VENV_DIR=".venv"
 USE_VENV=1
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
