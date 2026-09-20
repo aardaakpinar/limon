@@ -1,236 +1,98 @@
 # 🍋 limon
 
-**Linux (ve Windows/macOS) için çoklu AI sağlayıcılı komut satırı asistanı.**
-Dosya okur/yazar, kabuk komutları çalıştırır; her işlem için otomatik bir
-**tehlike skoru** hesaplayıp riskli olanlarda kullanıcı onayı ister.
+**Terminalde çalışan, çoklu AI sağlayıcılı komut satırı asistanı.**
+Dosya okur/yazar, komut çalıştırır; riskli işlemlerden önce sana sorar.
 
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue)
 ![License](https://img.shields.io/badge/license-GPL--3.0-blue)
 ![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macOS%20%7C%20windows-lightgrey)
 
-Desteklenen sağlayıcılar: **ChatGPT (OpenAI)** · **Gemini (Google)** · **Claude (Anthropic)** · **Ollama (yerel)**
+Sağlayıcılar: **ChatGPT (OpenAI)** · **Gemini (Google)** · **Claude (Anthropic)** · **Ollama (yerel)**
 
 ![](docs/screenshot.png)
 
-## İçindekiler
-
-- [Nasıl çalışır?](#nasıl-çalışır)
-- [Kurulum](#kurulum)
-    - [Linux / macOS](#linux--macos)
-    - [Windows (PowerShell)](#windows-powershell)
-- [Yapılandırma](#yapılandırma)
-- [Kullanım](#kullanım)
-- [Ollama (yerel model) kullanımı](#ollama-yerel-model-kullanımı)
-- [Tehlike skoru nasıl hesaplanıyor?](#tehlike-skoru-nasıl-hesaplanıyor)
-- [Yeni araç eklemek](#yeni-araç-eklemek)
-- [Proje yapısı](#proje-yapısı)
-- [Güvenlik notları](#güvenlik-notları)
-- [Sorun giderme](#sorun-giderme)
-- [Katkıda bulunma](#katkıda-bulunma)
-
-## Nasıl çalışır?
-
-1. Kullanıcı bir istek yazar.
-2. Seçili AI sağlayıcısı (ChatGPT/Gemini/Claude/Ollama) cevap üretir; gerekirse
-   bir **araç çağrısı** (`read_file`, `write_file`, `delete_file`, `list_dir`,
-   `run_command`, `get_current_datetime`) döndürür.
-3. `limon`, çağrılan aracın komutunu/hedefini [`danger.py`](limon/danger.py)
-   içindeki kural listesine göre **0–10 arası bir tehlike skoruna** çevirir
-   (örn. `rm -rf`, `sudo`, `dd`, `/etc` altına yazma, `curl | bash` gibi
-   desenler puan katar).
-4. Skor eşiği (varsayılan **5**, `limon config` ile değiştirilebilir) geçerse
-   kullanıcıdan onay istenir; geçmezse işlem sessizce/otomatik çalışır.
-5. Dosya üzerine yazma/silme işlemlerinde **otomatik yedek** alınır
-   (`.limon_backups/` klasörüne).
-6. Araç sonucu tekrar modele gönderilir, model son cevabını verene kadar
-   bu döngü sürer; nihai cevap kullanıcıya gösterilir.
-
 ## Kurulum
 
-### Linux / macOS
+Python 3.9 veya üstü gerekir.
 
-Kolay kurulum için repo kökünde sağlanan betiği kullanabilirsiniz:
+**Linux / macOS**
 
 ```bash
 git clone https://github.com/aardaakpinar/limon.git
 cd limon
-./install.sh                  # varsayılan: .venv oluşturur ve temel bağımlılıkları kurar
-./install.sh --extras all     # tüm sağlayıcı SDK'larını da kurar
-./install.sh --extras claude  # sadece Claude SDK'sını kurar
-./install.sh --no-venv        # venv oluşturmadan mevcut Python ortamına kurar
-./install.sh --help           # tüm seçenekleri gösterir
+bash install.sh
 ```
 
-Alternatif olarak manuel kurulum:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e ".[all]"
-```
-
-### Windows (PowerShell)
-
-Projede Windows için bir kurulum betiği bulunmaktadır; PowerShell'de çalıştırın:
+**Windows (PowerShell)**
 
 ```powershell
 git clone https://github.com/aardaakpinar/limon.git
 cd limon
 powershell -ExecutionPolicy Bypass -File .\install.ps1
-# veya extras ile:    .\install.ps1 -Extras all
-# venv olmadan:       .\install.ps1 -NoVenv
 ```
 
-Alternatif (manuel):
+Betik kurulumu bir sanal ortamda (`.venv`) yapar ama `limon` komutunu ortamın dışına da ekler. Yani **ortamı etkinleştirmene gerek yok**, `limon` her terminalden çalışır.
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -e ".[all]"
-```
+- Linux/macOS: komut `~/.local/bin` altına eklenir. Bu klasör PATH'te değilse betik ne yapman gerektiğini söyler.
+- Windows: kurulumdan sonra yeni bir terminal aç.
+- Proje klasörünü silme veya taşıma; kurulum ona bağlıdır.
 
-> **Script çalıştırma engellenirse:** PowerShell varsayılan olarak imzasız
-> script'leri engelleyebilir. Şunu **tek başına, ayrı bir satırda** çalıştırıp
-> tekrar deneyin:
->
-> ```powershell
-> Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
-> ```
->
-> **`Activate.ps1 bulunamadı` hatası alırsanız:** `.venv` klasörü oluşmamış
-> demektir — `dir .venv\Scripts` ile kontrol edip gerekirse `python -m venv .venv`
-> komutunu tekrar çalıştırın (bazı sistemlerde `py -3 -m venv .venv` gerekebilir).
+Yalnızca bir sağlayıcı kurmak için: `bash install.sh --extras claude` (`openai`, `gemini` veya `all`). Windows'ta: `.\install.ps1 -Extras claude`.
 
-Sadece belirli bir sağlayıcıyı kullanacaksanız daha az bağımlılık kurabilirsiniz:
-
-```bash
-pip install -e ".[claude]"   # sadece Claude
-pip install -e ".[openai]"   # sadece ChatGPT
-pip install -e ".[gemini]"   # sadece Gemini
-# Ollama için ekstra paket gerekmez (yerel HTTP API kullanılır)
-```
-
-Kurulumdan sonra `limon` komutu PATH'e eklenir (sanal ortam aktifken).
-
-## Yapılandırma
-
-İlk çalıştırmada otomatik olarak kurulum sihirbazı açılır, ya da manuel:
-
-```bash
-limon config
-```
-
-Bu sihirbaz şunları sorar:
-
-- Sağlayıcı: `openai` / `gemini` / `claude` / `ollama`
-- Model adı (ör. `gpt-4.1`, `gemini-flash-latest`, `claude-sonnet-4-6`, `llama3.1`)
-- API anahtarı (Ollama hariç) — veya ortam değişkeni de kullanılabilir:
-    - `OPENAI_API_KEY`, `GEMINI_API_KEY`, `ANTHROPIC_API_KEY`
-- Ollama kullanılıyorsa host adresi (varsayılan `http://localhost:11434`)
-- Tehlike onay eşiği (0–10)
-
-Ayarlar `~/.config/limon/config.json` içinde saklanır (izinler `600`,
-Windows'ta `%USERPROFILE%\.config\limon\config.json`). Bu dosya asla repoya
-commit edilmemelidir — `.gitignore` bunu zaten hariç tutuyor.
+`pipx` kullanıyorsan: `pipx install ".[all]"`
 
 ## Kullanım
 
 ```bash
-limon                              # etkileşimli REPL
-limon -p "bugünkü tarih nedir?"    # tek seferlik komut
+limon config                        # sağlayıcı, model, API anahtarı, onay eşiği
+limon                               # etkileşimli mod
+limon -p "bugünkü tarih nedir?"     # tek seferlik komut
+limon uninstall                     # ayarları sil
 ```
 
-REPL içinde:
+İlk çalıştırmada kurulum sihirbazı kendiliğinden açılır. Sağlayıcıyı seçtiğinde sihirbaz o sağlayıcının varsayılan modelini önerir; başka bir model için adını yazman yeterli.
 
-- `/config` — ayarları yeniden aç
-- `/reset` — konuşma geçmişini sıfırla
-- `exit` / `quit` / `Ctrl+D` — çıkış
+Etkileşimli modda: `/config` ayarları açar, `/reset` konuşmayı sıfırlar, `exit` veya `Ctrl+D` çıkar.
 
-## Ollama (yerel model) kullanımı
+| Sağlayıcı | Varsayılan model      | API anahtarı        |
+| --------- | --------------------- | ------------------- |
+| `openai`  | `gpt-4.1`             | `OPENAI_API_KEY`    |
+| `gemini`  | `gemini-flash-latest` | `GEMINI_API_KEY`    |
+| `claude`  | `claude-sonnet-4-6`   | `ANTHROPIC_API_KEY` |
+| `ollama`  | `llama3.1`            | gerekmez            |
 
-Ollama'nın yerelde çalışıyor ve tool-calling destekleyen bir model
-(`llama3.1`, `qwen2.5`, `mistral-nemo` vb.) çekilmiş olması gerekir:
+Ayarlar `~/.config/limon/config.json` dosyasında saklanır (Windows: `%USERPROFILE%\.config\limon\config.json`).
+
+**Ollama:** `ollama serve` çalışıyor olmalı ve tool-calling destekleyen bir model çekilmiş olmalı (`llama3.1`, `qwen2.5`, `mistral-nemo` vb.):
 
 ```bash
-ollama serve
 ollama pull llama3.1
-limon config     # sağlayıcı: ollama, model: llama3.1
+limon config    # sağlayıcı: ollama
 ```
 
-## Tehlike skoru nasıl hesaplanıyor?
+## Nasıl çalışır?
 
-[`limon/danger.py`](limon/danger.py) içinde regex tabanlı bir kural listesi
-var: `rm -rf`, fork bomb, `mkfs`, `dd`, disk cihazına yazma, `sudo`,
-`chmod 777`, `curl | bash`, `git push --force`, `DROP TABLE`, sistem
-dizinlerine (`/etc`, `/boot`, `/root` vb.) erişim gibi onlarca desen
-puanlanmış durumda. Skorlar toplanır, üst sınır 10'dur. Kendi ortamınıza
-göre bu dosyayı düzenleyerek kuralları özelleştirebilirsiniz.
+1. Bir istek yazarsın. Model gerekirse bir araç çağırır: `read_file`, `write_file`, `delete_file`, `list_dir`, `run_command`, `get_current_datetime`.
+2. limon her çağrıya [`danger.py`](limon/danger.py) içindeki kurallara göre **0–10 arası bir tehlike skoru** verir (`rm -rf`, `sudo`, `dd`, `curl | bash`, sistem dizinleri vb.).
+3. Skor eşiğe ulaşırsa (varsayılan **5**) senden onay ister; ulaşmazsa işlem doğrudan çalışır.
+4. Üzerine yazılan veya silinen dosyaların yedeği `.limon_backups/` klasörüne alınır.
 
-## Yeni araç eklemek
+## Özelleştirme
 
-[`limon/tools.py`](limon/tools.py) içindeki `TOOL_DEFINITIONS` listesine yeni
-bir tanım ve `TOOL_IMPLEMENTATIONS` sözlüğüne karşılık gelen fonksiyonu
-eklemeniz yeterli — tüm sağlayıcılar bu ortak tanımı otomatik olarak kendi
-formatlarına çevirir.
+- **Tehlike kuralları:** `limon/danger.py`
+- **Yeni araç:** `limon/tools.py` içindeki `TOOL_DEFINITIONS` listesine tanımı, `TOOL_IMPLEMENTATIONS` sözlüğüne fonksiyonu ekle. Tüm sağlayıcılar bunu otomatik kullanır.
+- **Yeni sağlayıcı:** `limon/providers/base.py` arayüzünü uygulayan bir dosya ekle.
 
-## Proje yapısı
+## Güvenlik
 
-```
-limon/
-├── limon/
-│   ├── cli.py                 REPL, terminal UI, kurulum sihirbazı
-│   ├── agent.py                ana döngü: provider <-> tool <-> onay akışı
-│   ├── danger.py                tehlike skorlama kuralları
-│   ├── tools.py                  araç tanımları + uygulamaları (dosya/komut)
-│   ├── config.py                 ayar dosyası okuma/yazma
-│   └── providers/
-│       ├── base.py                ortak sağlayıcı arayüzü
-│       ├── openai_provider.py      ChatGPT (openai SDK)
-│       ├── gemini_provider.py      Gemini (google-genai SDK)
-│       ├── claude_provider.py      Claude (anthropic SDK)
-│       └── ollama_provider.py      Ollama (yerel HTTP API)
-├── docs/                        proje web sayfası (GitHub Pages)
-├── install.sh                   Linux/macOS kolay kurulum betiği
-├── install.ps1                  Windows kolay kurulum betiği
-├── pyproject.toml
-├── LICENSE
-└── .gitignore
-```
-
-## Güvenlik notları
-
-- `run_command` doğrudan `bash`/kabuk üzerinde çalışır; skorlama bir güvenlik
-  ağı sağlar ama **kusursuz değildir** — düzenli ifadelerle eşleşmeyen tehlikeli
-  komutlar olabilir. Kritik sistemlerde ekstra dikkatli olun ve düşük eşik
-  (`danger_threshold`) kullanın.
-- API anahtarlarınız yalnızca yerel `~/.config/limon/config.json` dosyasında
-  saklanır, hiçbir yere gönderilmez (sadece ilgili AI sağlayıcısına, isteklerin
-  bir parçası olarak).
-- Bu proje "olduğu gibi" sunulur; üretim/kritik sistemlerde kullanmadan önce
-  kendi risk toleransınıza göre `danger.py` kurallarını gözden geçirin.
-
-## Sorun giderme
-
-**`json.decoder.JSONDecodeError` / config açılmıyor** — config dosyası bozulmuş
-olabilir, `limon` bunu artık otomatik tespit edip varsayılana dönüyor
-(bozuk dosya `.corrupt` uzantısıyla yedeklenir). Hâlâ sorun yaşıyorsanız
-`~/.config/limon/config.json` dosyasını silip `limon config` ile yeniden kurun.
-
-**Gemini'de `thought_signature` hatası** — eski `google-generativeai` paketi
-kullanımdan kaldırıldı; bu proje güncel `google-genai` SDK'sını kullanıyor.
-`pip install -e ".[all]"` ile bağımlılıkları güncel tutun.
-
-**`Activate.ps1` bulunamadı (Windows)** — bkz. [Windows (PowerShell)](#windows-powershell)
-bölümündeki not.
+- `run_command` doğrudan kabukta çalışır. Skorlama regex tabanlıdır ve kusursuz değildir; kritik sistemlerde eşiği düşük tut.
+- API anahtarların yalnızca yerel config dosyasında durur ve sadece seçtiğin sağlayıcıya gönderilir.
+- Yazılım "olduğu gibi" sunulur; önemli sistemlerde kullanmadan önce `danger.py` kurallarını gözden geçir.
 
 ## Katkıda bulunma
 
-Katkılar memnuniyetle karşılanır! Yeni bir sağlayıcı, yeni bir araç ya da
-daha iyi tehlike kuralları eklemek isterseniz:
+Fork'la, bir dal aç (`git checkout -b ozellik/yeni-arac`), değişikliğini yap ve pull request gönder. Hata bildirimleri ve öneriler için Issues sekmesini kullanabilirsin.
 
-1. Bu repoyu fork'layın
-2. Bir özellik dalı oluşturun (`git checkout -b ozellik/yeni-arac`)
-3. Değişikliklerinizi yapın ve mümkünse test edin
-4. Pull request açın
+## Lisans
 
-Hata bildirimleri ve öneriler için Issues sekmesini kullanabilirsiniz.
+[GPL-3.0](LICENSE)

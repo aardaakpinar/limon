@@ -3,7 +3,9 @@
     limon - Windows kolay kurulum betiği
 
 .DESCRIPTION
-    .venv sanal ortamı oluşturur ve limon'u (istenen extralarla) kurar.
+    .venv sanal ortamı oluşturur, limon'u (istenen extralarla) kurar ve
+    'limon' komutunu %USERPROFILE%\.local\bin altına kopyalayıp PATH'e ekler;
+    böylece sanal ortamı etkinleştirmeden her terminalden çalışır.
 
 .PARAMETER Extras
     Kurulacak ekstra sağlayıcı bağımlılıkları: all, claude, openai, gemini.
@@ -69,8 +71,6 @@ if ($MajorVersion -lt 3 -or ($MajorVersion -eq 3 -and $MinorVersion -lt 9)) {
 }
 
 # --- Sanal ortam --------------------------------------------------------------
-$ActivateScript = Join-Path $VenvDir "Scripts\Activate.ps1"
-
 if (-not $NoVenv) {
     if (Test-Path $VenvDir) {
         Write-Info "Mevcut sanal ortam kullaniliyor: $VenvDir"
@@ -79,22 +79,17 @@ if (-not $NoVenv) {
         & $PythonBin @PythonArgsPrefix -m venv $VenvDir
     }
 
-    if (-not (Test-Path $ActivateScript)) {
-        Write-Err2 "'$ActivateScript' bulunamadi. '$VenvDir' klasorunu silip tekrar deneyin."
+    # Activate.ps1 gerekmez (ve script calistirma politikasina takilmaz):
+    # dogrudan sanal ortamin python.exe'sini kullaniyoruz.
+    $VenvScripts = Join-Path (Resolve-Path $VenvDir).Path "Scripts"
+    $VenvPython  = Join-Path $VenvScripts "python.exe"
+
+    if (-not (Test-Path $VenvPython)) {
+        Write-Err2 "'$VenvPython' bulunamadi. '$VenvDir' klasorunu silip tekrar deneyin."
         exit 1
     }
 
-    Write-Info "Sanal ortam etkinlestiriliyor..."
-    try {
-        & $ActivateScript
-    } catch {
-        Write-Err2 "Sanal ortam etkinlestirilemedi. Script calistirma politikasi engelliyor olabilir."
-        Write-Host "Su komutu ayri bir satirda calistirip tekrar deneyin:" -ForegroundColor Yellow
-        Write-Host "  Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned"
-        exit 1
-    }
-
-    $PythonBin = "python"
+    $PythonBin = $VenvPython
     $PythonArgsPrefix = @()
 } else {
     Write-Warn2 "-NoVenv verildi; paketler mevcut Python ortamina kurulacak."
@@ -113,12 +108,34 @@ if ($Extras -ne "") {
     & $PythonBin @PythonArgsPrefix -m pip install -e "."
 }
 
+if ($LASTEXITCODE -ne 0) {
+    Write-Err2 "Kurulum basarisiz oldu (pip cikis kodu: $LASTEXITCODE)."
+    exit 1
+}
+
+# --- 'limon' komutunu sanal ortamin disinda da kullanilabilir yap -----------------
+if (-not $NoVenv) {
+    $LimonExe = Join-Path $VenvScripts "limon.exe"
+    $BinDir   = Join-Path $env:USERPROFILE ".local\bin"
+
+    if (Test-Path $LimonExe) {
+        New-Item -ItemType Directory -Force -Path $BinDir | Out-Null
+        Copy-Item $LimonExe (Join-Path $BinDir "limon.exe") -Force
+        Write-Info "Komut kopyalandi: $(Join-Path $BinDir 'limon.exe')"
+
+        $UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
+        $Entries  = @($UserPath -split ";" | Where-Object { $_ })
+        if ($Entries -notcontains $BinDir) {
+            [Environment]::SetEnvironmentVariable("Path", (($Entries + $BinDir) -join ";"), "User")
+            Write-Info "$BinDir kullanici PATH'ine eklendi. Yeni bir terminal acin."
+        }
+    } else {
+        Write-Warn2 "'$LimonExe' bulunamadi; komut PATH'e eklenemedi."
+    }
+}
+
 Write-Host ""
 Write-Info "Kurulum tamamlandi!"
-if (-not $NoVenv) {
-    Write-Host "Sanal ortami etkinlestirmek icin:"
-    Write-Host "  $ActivateScript"
-}
-Write-Host "Kullanmaya baslamak icin:"
+Write-Host "Kullanmaya baslamak icin (yeni bir terminalde):"
 Write-Host "  limon config     # saglayici / model / API anahtari ayarla"
 Write-Host "  limon            # etkilesimli REPL'i baslat"

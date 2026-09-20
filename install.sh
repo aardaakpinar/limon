@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 #
-# limon - Linux/macOS kolay kurulum betiği
+# limon - Linux/macOS kurulum betiği
 #
 # Kullanım:
-# ./install.sh                 -> .venv oluşturur ve tüm sağlayıcıları kurar (varsayılan)
-# ./install.sh --extras all    -> tüm sağlayıcı SDK'larını kurar
-# ./install.sh --extras claude -> sadece Claude SDK'sını kurar
-# ./install.sh --extras openai -> sadece OpenAI SDK'sını kurar
-# ./install.sh --extras gemini -> sadece Gemini SDK'sını kurar
+# ./install.sh                  -> .venv oluşturur, limon'u kurar ve `limon` komutunu ~/.local/bin'e bağlar
+# ./install.sh --extras claude  -> sadece Claude SDK'sını kurar (openai, gemini, all de olur)
+# ./install.sh --no-venv        -> venv oluşturmadan mevcut Python ortamına kurar
+# ./install.sh --bin-dir DIR    -> komutu ~/.local/bin yerine DIR içine bağlar
 
 set -euo pipefail
 
@@ -15,6 +14,7 @@ set -euo pipefail
 EXTRAS="all"
 VENV_DIR=".venv"
 USE_VENV=1
+BIN_DIR="$HOME/.local/bin"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 # --- Renkli çıktı yardımcıları ---------------------------------------------
@@ -29,7 +29,7 @@ warn()  { printf "%b\n" "${YELLOW}==>${RESET} $*"; }
 error() { printf "%b\n" "${RED}HATA:${RESET} $*" >&2; }
 
 usage() {
-  sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//'
 }
 
 # --- Argümanları ayrıştır ----------------------------------------------------
@@ -49,6 +49,14 @@ while [ $# -gt 0 ]; do
       ;;
     --venv-dir=*)
       VENV_DIR="${1#*=}"
+      shift
+      ;;
+    --bin-dir)
+      BIN_DIR="${2:-$BIN_DIR}"
+      shift 2
+      ;;
+    --bin-dir=*)
+      BIN_DIR="${1#*=}"
       shift
       ;;
     --no-venv)
@@ -104,10 +112,9 @@ if [ "$USE_VENV" -eq 1 ]; then
     "$PYTHON_BIN" -m venv "$VENV_DIR"
   fi
 
-  # shellcheck disable=SC1090
-  source "$VENV_DIR/bin/activate"
-  PYTHON_BIN="python"
-  info "Sanal ortam etkinleştirildi."
+  # Etkinleştirmeye (activate) gerek yok: doğrudan venv'in Python'unu kullanıyoruz.
+  VENV_ABS="$(cd "$VENV_DIR" && pwd)"
+  PYTHON_BIN="$VENV_ABS/bin/python"
 else
   warn "--no-venv verildi; paketler mevcut Python ortamına kurulacak."
 fi
@@ -125,12 +132,30 @@ else
   "$PYTHON_BIN" -m pip install -e "."
 fi
 
+# --- `limon` komutunu sanal ortamın dışında da kullanılabilir yap ---------------
+if [ "$USE_VENV" -eq 1 ]; then
+  LIMON_EXE="$VENV_ABS/bin/limon"
+  LINK="$BIN_DIR/limon"
+  mkdir -p "$BIN_DIR"
+  if [ -e "$LINK" ] && [ ! -L "$LINK" ]; then
+    warn "$LINK zaten var ve bir kısayol değil; dokunulmadı."
+    warn "Komutu doğrudan şuradan çalıştırabilirsiniz: $LIMON_EXE"
+  else
+    ln -sf "$LIMON_EXE" "$LINK"
+    info "Kısayol oluşturuldu: $LINK"
+  fi
+
+  case ":$PATH:" in
+    *":$BIN_DIR:"*) ;;
+    *)
+      warn "$BIN_DIR PATH içinde değil. Şu satırı ~/.bashrc veya ~/.zshrc dosyanıza ekleyip terminali yeniden açın:"
+      echo "  export PATH=\"$BIN_DIR:\$PATH\""
+      ;;
+  esac
+fi
+
 echo
 info "${BOLD}Kurulum tamamlandı!${RESET}"
-if [ "$USE_VENV" -eq 1 ]; then
-  echo "Sanal ortamı etkinleştirmek için:"
-  echo "  source $VENV_DIR/bin/activate"
-fi
 echo "Kullanmaya başlamak için:"
 echo "  limon config     # sağlayıcı / model / API anahtarı ayarla"
 echo "  limon            # etkileşimli REPL'i başlat"

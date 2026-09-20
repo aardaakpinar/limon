@@ -3,7 +3,8 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Limon</title>
+		<title>Limon - Kontrollü AI komut satırı asistanı</title>
+		<meta name="description" content="Terminalde çalışan AI asistanı. Dosya okur, komut çalıştırır; riskli işlemlerden önce sana sorar." />
 		<link rel="shortcut icon" href="https://aardaakpinar.github.io/images/logos/limon.png" />
 		<script src="https://cdn.tailwindcss.com"></script>
 		<script src="tailwind.config.js"></script>
@@ -39,7 +40,8 @@
 					<span class="text-limon">Kontrol sende kalsın.</span>
 				</h1>
 
-				<p class="mt-6 max-w-2xl mx-auto text-lg text-white/60">Gemini, Claude ve OpenAI modelleriyle etkileşim kurar; model araç çağrılarını proje içindeki tehlike kurallarına göre sınıflandırır ve riskli işlemler için kullanıcı onayı ister.</p>
+				<p class="mt-6 max-w-2xl mx-auto text-lg text-white/60">Terminalde çalışan AI asistanı. Dosya okur, komut çalıştırır; riskli bir işlem olursa önce sana sorar.</p>
+				<p class="mt-3 text-sm text-white/40">ChatGPT · Gemini · Claude · Ollama</p>
 
 				<div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
 					<a href="https://github.com/aardaakpinar/limon" target="_blank" class="bg-limon text-black px-8 py-3 rounded-lg font-semibold hover:brightness-110 hover:shadow-glow transition"> GitHub'dan Başla </a>
@@ -56,13 +58,12 @@
 							<span class="ml-2 text-xs text-white/40 font-mono">limon ~ terminal</span>
 						</div>
 						<div class="px-6 py-5 font-mono text-sm text-left space-y-2">
-							<div><span class="text-limon">$</span> limon "Yeni bir dosya oluştur"</div>
-							<div class="text-white/50">&gt; Çalışma alanı: /home/limon</div>
-							<div class="text-white/50">&gt; Dosya hazırlandı: /home/limon/README.md</div>
-							<div class="text-white/50">&gt; Dış alan erişimi isteği: /etc/hosts</div>
-							<div class="text-white/50">&gt; Önizleme için: less /etc/hosts</div>
-							<div class="text-green-400">[ONAY] /etc/hosts düzenlensin mi? (e/h)</div>
-							<div><span class="text-limon">$</span> e<span class="animate-pulse text-limon">_</span></div>
+							<div><span class="text-limon">$</span> limon -p "hosts dosyasına bir kayıt ekle"</div>
+							<div class="text-white/50">📄 read_file /etc/hosts</div>
+							<div class="text-red-400 font-bold">⚠ ONAY GEREKİYOR &nbsp;[████████░░] 8/10</div>
+							<div class="text-white/80">&nbsp;&nbsp;✏️ write_file /etc/hosts</div>
+							<div class="text-white/50">&nbsp;&nbsp;Sebep: Var olan dosyanın üzerine yazılacak (yedek alınacak); Sistem dizinine erişim: /etc/hosts</div>
+							<div>&nbsp;&nbsp;Devam edilsin mi? [<span class="text-green-400">e</span>vet / <span class="text-red-400">h</span>ayır]: e<span class="animate-pulse text-limon">_</span></div>
 						</div>
 					</div>
 				</div>
@@ -76,30 +77,23 @@
 
 				<div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
 					<div class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition">
-						<h3 class="font-semibold mb-3">Kişisel Çalışma Alanı</h3>
-						<p class="text-sm text-white/60">
-							Örn:
-							<span class="text-white/80">/home/limon</span>
-							içinde dosya oluşturur ve düzenler, onay beklemez.
-						</p>
+						<h3 class="font-semibold mb-3">Tehlike skoru</h3>
+						<p class="text-sm text-white/60">Her komut ve dosya işlemi 0 – 10 arası puanlanır.</p>
 					</div>
 
 					<div class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition">
-						<h3 class="font-semibold mb-3">Yetki Dışı Onay</h3>
-						<p class="text-sm text-white/60">Kendi alanının dışına çıkarsa senden açık onay ister.</p>
+						<h3 class="font-semibold mb-3">Sadece riskliyse sorar</h3>
+						<p class="text-sm text-white/60">Skor eşiğe ulaşırsa onay ister (varsayılan 5). Diğer işlemler kesintisiz çalışır.</p>
 					</div>
 
 					<div class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition">
-						<h3 class="font-semibold mb-3">Dosya Önizleme</h3>
-						<p class="text-sm text-white/60">
-							Onaydan önce içeriği
-							<span class="text-white/80">less</span> veya <span class="text-white/80">more</span> ile gösterir.
-						</p>
+						<h3 class="font-semibold mb-3">Otomatik yedek</h3>
+						<p class="text-sm text-white/60">Üzerine yazılan veya silinen dosyaların yedeği <span class="text-white/80">.limon_backups/</span> klasörüne alınır.</p>
 					</div>
 
 					<div class="p-8 rounded-2xl border border-white/10 bg-white/5 hover:border-limon/40 hover:shadow-glow transition">
-						<h3 class="font-semibold mb-3">Net Sınırlar</h3>
-						<p class="text-sm text-white/60">Kritik işlemler görünür; karar her zaman sende.</p>
+						<h3 class="font-semibold mb-3">İstediğin model</h3>
+						<p class="text-sm text-white/60">ChatGPT, Gemini, Claude ya da bilgisayarında çalışan Ollama.</p>
 					</div>
 				</div>
 			</div>
@@ -111,7 +105,7 @@
 				<h2 class="text-3xl md:text-5xl font-bold mb-12">Dakikalar içinde hazır</h2>
 
 				<div class="space-y-6 text-left">
-					<p class="text-white/60">Limon'u kurmak için işletim sisteminizi seçin:</p>
+					<p class="text-white/60">İşletim sistemini seç. Python 3.9+ gerekir.</p>
 
 					<!-- OS Tabs -->
 					<div class="flex gap-4 mb-8">
@@ -127,8 +121,9 @@
 
 					<!-- Linux/macOS -->
 					<div class="os-content" id="unix-content">
+						<p class="mb-3 text-sm text-white/40"><span class="text-white/60">chmod +x install.sh</span> komutu gerekebilir.</p>
 						<div class="p-6 rounded-xl border border-white/10 bg-white/5">
-							<code class="text-limon"> ./install.sh </code>
+							<code class="text-limon"> bash install.sh </code>
 						</div>
 					</div>
 
@@ -175,7 +170,7 @@
 
 		<!-- Footer -->
 		<footer class="py-12 border-t border-white/10 text-center text-white/40">
-			<p>2026 Limon. Açık Kaynak.</p>
+			<p>2026 Limon. Açık kaynak (GPL-3.0).</p>
 		</footer>
 		<script async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
 	</body>

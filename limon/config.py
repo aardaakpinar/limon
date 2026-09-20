@@ -18,6 +18,23 @@ DEFAULT_MODELS = {
     "ollama": "llama3.1",
 }
 
+def suggest_model(provider: str, current_model: str = "", provider_changed: bool = False) -> str:
+    """Seçilen sağlayıcı için önerilecek modeli döndürür.
+
+    Sağlayıcı değiştiyse önceki sağlayıcının modeli anlamsızdır, o yüzden yeni
+    sağlayıcının varsayılanı önerilir. Sağlayıcı aynıysa mevcut model korunur.
+    """
+    default = DEFAULT_MODELS.get(provider, "")
+    if provider_changed or not current_model:
+        return default
+    # Başka bir sağlayıcının varsayılan modeli kalmışsa (eski sürümdeki hata
+    # yüzünden bozulmuş config) onu önerme.
+    other_defaults = {m for p, m in DEFAULT_MODELS.items() if p != provider}
+    if current_model in other_defaults:
+        return default
+    return current_model
+
+
 DEFAULTS = {
     "provider": "claude",
     "model": DEFAULT_MODELS["claude"],

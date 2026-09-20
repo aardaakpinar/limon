@@ -95,6 +95,7 @@ def run_setup_wizard():
         for i, p in enumerate(PROVIDER_CHOICES, 1):
             marker = " (mevcut)" if p == cfg["provider"] else ""
             print(f"  {i}. {p}{marker}")
+        previous_provider = cfg["provider"]
         choice = input(f"Seçim [{PROVIDER_CHOICES.index(cfg['provider'])+1}]: ").strip()
         if choice:
             try:
@@ -102,9 +103,11 @@ def run_setup_wizard():
             except (ValueError, IndexError):
                 print(f"{RED}Geçersiz seçim, mevcut sağlayıcı korunuyor.{RESET}")
 
-        default_model = cfgmod.DEFAULT_MODELS.get(cfg["provider"], "")
-        model = input(f"Model [{cfg.get('model') or default_model}]: ").strip()
-        cfg["model"] = model or cfg.get("model") or default_model
+        suggested = cfgmod.suggest_model(
+            cfg["provider"], cfg.get("model", ""), provider_changed=cfg["provider"] != previous_provider
+        )
+        model = input(f"Model [{suggested}]: ").strip()
+        cfg["model"] = model or suggested
 
         if cfg["provider"] in ("openai", "gemini", "claude"):
             current = cfg["api_keys"].get(cfg["provider"], "")
@@ -169,8 +172,10 @@ def repl(cfg: dict):
             break
         if user_input.lower() in ("/config",):
             run_setup_wizard()
+            cfg = cfgmod.load_config()
             provider = build_provider(cfg)
             agent = Agent(provider, danger_threshold=cfg.get("danger_threshold", 5))
+            print(f"{DIM}sağlayıcı: {cfg['provider']} | model: {cfg['model']} | eşik: {cfg.get('danger_threshold')}{RESET}")
             continue
         if user_input.lower() in ("/reset",):
             agent.history = []
@@ -229,7 +234,10 @@ def uninstall():
         sys.exit(1)
     
     print(f"\nPaketi tamamen kaldırmak için:")
-    print(f"  {CYAN}pip uninstall limon{RESET}")
+    print(f"  {CYAN}\"{sys.executable}\" -m pip uninstall limon{RESET}")
+    shortcut = shutil.which("limon")
+    if shortcut:
+        print(f"Ardından kısayol dosyasını da silebilirsin: {shortcut}")
 
 
 def main():
