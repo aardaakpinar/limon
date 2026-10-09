@@ -63,7 +63,10 @@ class DangerAssessment:
 def _path_risk(path: str) -> Tuple[int, Optional[str]]:
     if not path:
         return 0, None
-    abspath = os.path.abspath(os.path.expanduser(path))
+    expanded = os.path.expanduser(path).replace("\\", "/")
+    # Keep POSIX absolute paths intact on Windows instead of resolving them
+    # against the current drive and working directory.
+    abspath = expanded if expanded.startswith("/") else os.path.abspath(expanded).replace("\\", "/")
     for prefix in SYSTEM_PATH_PREFIXES:
         if abspath == prefix or abspath.startswith(prefix + "/"):
             return 7, f"Sistem dizinine erişim: {abspath}"

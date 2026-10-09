@@ -10,6 +10,7 @@ Akış:
     -> Nihai metin kullanıcıya gösterilir
 """
 
+import locale
 from typing import Callable, List, Optional
 
 from . import danger
@@ -55,8 +56,13 @@ def find_project_instructions(start_dir: Optional[str] = None) -> Optional[tuple
         candidate = os.path.join(cur, PROJECT_FILE)
         if os.path.isfile(candidate):
             try:
-                with open(candidate, "r", encoding="utf-8", errors="replace") as f:
-                    return candidate, f.read(MAX_PROJECT_FILE_CHARS)
+                try:
+                    with open(candidate, "r", encoding="utf-8") as f:
+                        content = f.read(MAX_PROJECT_FILE_CHARS)
+                except UnicodeDecodeError:
+                    with open(candidate, "r", encoding=locale.getpreferredencoding(False), errors="replace") as f:
+                        content = f.read(MAX_PROJECT_FILE_CHARS)
+                return candidate, content
             except OSError:
                 return None
         parent = os.path.dirname(cur)
