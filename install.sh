@@ -148,14 +148,32 @@ if [ "$USE_VENV" -eq 1 ]; then
   case ":$PATH:" in
     *":$BIN_DIR:"*) ;;
     *)
-      warn "$BIN_DIR PATH içinde değil. Şu satırı ~/.bashrc veya ~/.zshrc dosyanıza ekleyip terminali yeniden açın:"
-      echo "  export PATH=\"$BIN_DIR:\$PATH\""
+      # PATH'e kalıcı olarak ekle (tekrar çalıştırılırsa çoğaltmaz)
+      EXPORT_LINE="export PATH=\"$BIN_DIR:\$PATH\""
+      case "$(basename "${SHELL:-}")" in
+        zsh)  RC_FILES=("$HOME/.zshrc") ;;
+        bash) RC_FILES=("$HOME/.bashrc" "$HOME/.bash_profile") ;;
+        *)    RC_FILES=("$HOME/.profile") ;;
+      esac
+      for RC in "${RC_FILES[@]}"; do
+        # .bash_profile yalnızca zaten varsa; yoksa oluşturup .bashrc'yi gölgelemeyelim
+        if [ "$RC" = "$HOME/.bash_profile" ] && [ ! -e "$RC" ]; then continue; fi
+        if ! grep -qsF "$BIN_DIR" "$RC"; then
+          printf '\n# limon\n%s\n' "$EXPORT_LINE" >> "$RC"
+          info "$BIN_DIR PATH'e eklendi: $RC"
+        fi
+      done
+      NEED_RELOAD=1
       ;;
   esac
 fi
 
 echo
 info "${BOLD}Kurulum tamamlandı!${RESET}"
+if [ "${NEED_RELOAD:-0}" -eq 1 ]; then
+  warn "PATH değişikliğinin etkili olması için ${BOLD}yeni bir terminal açın${RESET} ya da şunu çalıştırın:"
+  echo "  export PATH=\"$BIN_DIR:\$PATH\""
+fi
 echo "Kullanmaya başlamak için:"
 echo "  limon config     # sağlayıcı / model / API anahtarı ayarla"
 echo "  limon            # etkileşimli REPL'i başlat"

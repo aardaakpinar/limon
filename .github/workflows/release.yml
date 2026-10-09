@@ -1,0 +1,53 @@
+name: release
+# Kullanım: __version__'ı güncelle, commit'le, sonra `git tag v0.2.0 && git push --tags`.
+# Etiket gönderilince paket derlenir, PyPI'ye yüklenir ve GitHub'da sürüm oluşturulur.
+# Kurulum betikleri "son sürüm" olarak bu GitHub sürümünü kullanır.
+on:
+  push:
+    tags: ["v*"]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Etiket ile limon.__version__ aynı mı?
+        run: |
+          VERSION=$(python -c "import re;print(re.search(r'__version__ = \"(.+?)\"', open('limon/__init__.py').read()).group(1))")
+          if [ "v$VERSION" != "${GITHUB_REF_NAME}" ]; then
+            echo "Etiket (${GITHUB_REF_NAME}) ile __version__ (v$VERSION) uyuşmuyor"; exit 1
+          fi
+      - run: python -m pip install build pytest requests && python -m pytest -q
+      - run: python -m build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+  pypi:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi            # PyPI'de "trusted publisher" olarak bu depo/iş akışı tanımlanmalı
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+  github-release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: GitHub sürümü oluştur
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" dist/* --repo "${GITHUB_REPOSITORY}" --generate-notes

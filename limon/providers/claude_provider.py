@@ -28,7 +28,7 @@ class ClaudeProvider(BaseProvider):
     def chat(self, system_prompt: str, history: List[dict], tools: List[dict]) -> ChatResult:
         response = self.client.messages.create(
             model=self.model,
-            max_tokens=4096,
+            max_tokens=8192,
             system=system_prompt,
             messages=history,
             tools=self._convert_tools(tools),
@@ -42,7 +42,17 @@ class ClaudeProvider(BaseProvider):
             elif block.type == "tool_use":
                 tool_calls.append(ToolCall(id=block.id, name=block.name, arguments=block.input))
 
-        assistant_content = [b.model_dump() for b in response.content]
+        # model_dump() SDK sürümüne göre API'nin kabul etmediği ek alanlar
+        # (ör. citations, caller) içerebilir; yalnızca gerekli alanları geri gönder.
+        assistant_content = []
+        for b in response.content:
+            if b.type == "text":
+                if b.text:
+                    assistant_content.append({"type": "text", "text": b.text})
+            elif b.type == "tool_use":
+                assistant_content.append(
+                    {"type": "tool_use", "id": b.id, "name": b.name, "input": b.input}
+                )
         return ChatResult(
             text="\n".join(text_parts).strip(),
             tool_calls=tool_calls,

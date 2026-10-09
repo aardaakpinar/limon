@@ -62,6 +62,13 @@ class OllamaProvider(BaseProvider):
         )
 
     def append_tool_results(self, history, assistant_msg, tool_calls, results):
-        history.append({"role": "assistant", "content": assistant_msg.get("content", "")})
+        history.append({
+            "role": "assistant",
+            "content": assistant_msg.get("content", "") or "",
+            "tool_calls": [
+                {"function": {"name": tc.name, "arguments": tc.arguments}}
+                for tc in tool_calls
+            ],
+        })
         for tc, res in zip(tool_calls, results):
-            history.append({"role": "tool", "content": res})
+            history.append({"role": "tool", "tool_name": tc.name, "content": res})

@@ -80,6 +80,10 @@ class GeminiProvider(BaseProvider):
             ),
         )
 
+        if not response.candidates or response.candidates[0].content is None \
+                or not response.candidates[0].content.parts:
+            reason = response.candidates[0].finish_reason if response.candidates else "boş yanıt"
+            raise RuntimeError(f"Gemini içerik döndürmedi (sebep: {reason}).")
         candidate = response.candidates[0]
         text_parts = []
         tool_calls = []

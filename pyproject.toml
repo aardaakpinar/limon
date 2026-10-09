@@ -4,17 +4,23 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "limon"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Senin için, çoklu AI sağlayıcılı (ChatGPT/Gemini/Claude/Ollama) komut satırı asistanı"
 readme = "README.md"
 license = { text = "GPL-3.0-or-later" }
 requires-python = ">=3.9"
+keywords = ["cli", "ai", "assistant", "chatgpt", "gemini", "claude", "ollama", "terminal"]
 classifiers = [
     "Environment :: Console",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
-    "Operating System :: POSIX :: Linux",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
     "requests>=2.31.0",
@@ -25,9 +31,21 @@ openai = ["openai>=1.30.0"]
 gemini = ["google-genai>=1.0.0"]
 claude = ["anthropic>=0.30.0"]
 all = ["openai>=1.30.0", "google-genai>=1.0.0", "anthropic>=0.30.0"]
+dev = ["pytest>=7"]
+
+[project.urls]
+Homepage = "https://aardaakpinar.github.io/limon/"
+Repository = "https://github.com/aardaakpinar/limon"
+Issues = "https://github.com/aardaakpinar/limon/issues"
 
 [project.scripts]
 limon = "limon.cli:entrypoint"
 
 [tool.setuptools]
 packages = ["limon", "limon.providers"]
+
+[tool.setuptools.dynamic]
+version = { attr = "limon.__version__" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

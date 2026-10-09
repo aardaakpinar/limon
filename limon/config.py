@@ -14,7 +14,7 @@ CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
 DEFAULT_MODELS = {
     "openai": "gpt-4.1",
     "gemini": "gemini-flash-latest",
-    "claude": "claude-sonnet-4-6",
+    "claude": "claude-sonnet-5-5",
     "ollama": "llama3.1",
 }
 

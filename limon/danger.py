@@ -70,6 +70,65 @@ def _path_risk(path: str) -> Tuple[int, Optional[str]]:
     return 0, None
 
 
+SENSITIVE_PATH_PATTERNS = [
+    (r"(^|/)\.ssh(/|$)", "SSH anahtarları klasörü"),
+    (r"(^|/)\.gnupg(/|$)", "GPG anahtarlığı"),
+    (r"(^|/)\.aws(/|$)", "AWS kimlik bilgileri"),
+    (r"(^|/)\.config/limon(/|$)", "limon yapılandırması (API anahtarları içerir)"),
+    (r"(^|/)\.env(\.[\w.-]+)?$", ".env gizli değişkenler dosyası"),
+    (r"(^|/)id_(rsa|dsa|ecdsa|ed25519)$", "Özel anahtar dosyası"),
+    (r"\.(pem|key|p12|pfx)$", "Anahtar/sertifika dosyası"),
+    (r"^/etc/(shadow|sudoers)", "Sistem parola/yetki dosyası"),
+]
+
+
+def assess_file_read(path: str) -> DangerAssessment:
+    """Okuma normalde risksizdir; gizli anahtar/parola dosyaları ise içeriğin
+    sağlayıcıya gönderilmesi demektir, bu yüzden onay istenir."""
+    if not path:
+        return DangerAssessment(score=0, reasons=[])
+    abspath = os.path.abspath(os.path.expanduser(path)).replace("\\", "/")
+    for pattern, desc in SENSITIVE_PATH_PATTERNS:
+        if re.search(pattern, abspath, flags=re.IGNORECASE):
+            return DangerAssessment(
+                score=6, reasons=[f"Hassas dosya okunuyor, içeriği yapay zeka sağlayıcısına gönderilir: {desc}"]
+            )
+    return DangerAssessment(score=0, reasons=[])
+
+
+def is_private_host(host: str) -> bool:
+    """Ana makine adı yerel/özel/link-local bir adrese çözülüyorsa True."""
+    import ipaddress
+    import socket
+
+    if not host:
+        return True
+    if host.lower() in ("localhost",) or host.lower().endswith((".local", ".internal")):
+        return True
+    try:
+        infos = socket.getaddrinfo(host, None)
+    except OSError:
+        return False  # çözülemiyorsa istek zaten başarısız olur
+    for info in infos:
+        ip = ipaddress.ip_address(info[4][0].split("%")[0])
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved:
+            return True
+    return False
+
+
+def assess_url(url: str) -> DangerAssessment:
+    from urllib.parse import urlparse
+
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        return DangerAssessment(score=3, reasons=["Desteklenmeyen adres türü"])
+    if is_private_host(parsed.hostname or ""):
+        return DangerAssessment(
+            score=6, reasons=[f"Yerel/özel ağ adresine istek: {parsed.hostname} (iç servislere erişim olabilir)"]
+        )
+    return DangerAssessment(score=0, reasons=[])
+
+
 def assess_command(command: str) -> DangerAssessment:
     score = 0
     reasons = []

@@ -11,10 +11,11 @@ import shutil
 import sys
 import time
 
+from . import __version__
 from . import config as cfgmod
 from .agent import Agent, ToolDecision
 from .danger import DangerAssessment
-from .errors import ProviderError
+from .errors import ProviderError, humanize_provider_error
 from .providers import PROVIDER_CHOICES, create_provider
 
 RESET = "\033[0m"
@@ -40,6 +41,10 @@ BANNER = f"""
 TOOL_ICONS = {
     "read_file": "📄",
     "write_file": "✏️",
+    "edit_file": "🔧",
+    "grep": "🔎",
+    "glob": "🗂️",
+    "web_fetch": "🌐",
     "delete_file": "🗑️",
     "list_dir": "📁",
     "run_command": "🖥️",
@@ -78,8 +83,14 @@ class CLIToolDecision(ToolDecision):
 def _summarize_args(tool_name: str, args: dict) -> str:
     if tool_name == "run_command":
         return args.get("command", "")
-    if tool_name in ("read_file", "write_file", "delete_file"):
+    if tool_name in ("read_file", "write_file", "delete_file", "edit_file"):
         return args.get("path", "")
+    if tool_name == "grep":
+        return f"{args.get('pattern', '')} in {args.get('path', '.')}"
+    if tool_name == "glob":
+        return args.get("pattern", "")
+    if tool_name == "web_fetch":
+        return args.get("url", "")
     if tool_name == "list_dir":
         return args.get("path", ".")
     return str(args)
@@ -106,7 +117,19 @@ def run_setup_wizard():
         suggested = cfgmod.suggest_model(
             cfg["provider"], cfg.get("model", ""), provider_changed=cfg["provider"] != previous_provider
         )
-        model = input(f"Model [{suggested}]: ").strip()
+        model = input(f"Model [{suggested}] (? = canlı liste): ").strip()
+        if model == "?":
+            try:
+                from .models import list_models
+                key = cfgmod.get_api_key(cfg, cfg["provider"])
+                if cfg["provider"] != "ollama" and not key:
+                    print(f"{YELLOW}Liste için önce API anahtarı gerekli; anahtarı girdikten sonra 'limon models' çalıştır.{RESET}")
+                else:
+                    for m in list_models(cfg["provider"], api_key=key, ollama_host=cfg.get("ollama_host", "")):
+                        print(f"  {m}")
+            except Exception as e:
+                print(f"{RED}Liste alınamadı: {humanize_provider_error(e)}{RESET}")
+            model = input(f"Model [{suggested}]: ").strip()
         cfg["model"] = model or suggested
 
         if cfg["provider"] in ("openai", "gemini", "claude"):
@@ -157,6 +180,10 @@ def repl(cfg: dict):
 
     print(BANNER)
     print(f"{DIM}sağlayıcı: {cfg['provider']} | model: {cfg['model']} | eşik: {cfg.get('danger_threshold')}{RESET}")
+    from .agent import find_project_instructions
+    proj = find_project_instructions()
+    if proj:
+        print(f"{DIM}proje talimatları yüklendi: {proj[0]}{RESET}")
     print(f"{DIM}çıkmak için: exit / quit / Ctrl+D{RESET}\n")
 
     while True:
@@ -207,6 +234,32 @@ def repl(cfg: dict):
         print()
 
 
+def show_models(provider: str = ""):
+    """`limon models [sağlayıcı]`: sağlayıcının canlı model listesini yazdır."""
+    from .models import list_models
+
+    cfg = cfgmod.load_config()
+    provider = provider or cfg["provider"]
+    api_key = cfgmod.get_api_key(cfg, provider)
+    if provider != "ollama" and not api_key:
+        print(f"{RED}Hata: {provider} için API anahtarı bulunamadı.{RESET} 'limon config' ile ayarla.")
+        sys.exit(1)
+    try:
+        models = list_models(provider, api_key=api_key, ollama_host=cfg.get("ollama_host", ""))
+    except Exception as e:
+        print(f"{RED}Hata: {humanize_provider_error(e)}{RESET}")
+        sys.exit(1)
+    if not models:
+        print(f"{YELLOW}{provider} için model bulunamadı.{RESET}")
+        return
+    current = cfg["model"] if provider == cfg["provider"] else ""
+    print(f"{BOLD}{provider}{RESET} modelleri ({len(models)}):")
+    for m in models:
+        mark = f"  {GREEN}← seçili{RESET}" if m == current else ""
+        print(f"  {m}{mark}")
+    print(f"\n{DIM}Seçmek için: limon config{RESET}")
+
+
 def uninstall():
     """Limon ayarlarını ve yapılandırma dosyalarını kaldır."""
     print(f"{YELLOW}{BOLD}⚠ Uyarı: Limon yapılandırması silinecek!{RESET}\n")
@@ -245,10 +298,23 @@ def main():
     sub = parser.add_subparsers(dest="command")
     sub.add_parser("config", help="Sağlayıcı / API anahtarı / eşik ayarlarını yapılandır")
     sub.add_parser("uninstall", help="Limon yapılandırmasını ve ayarlarını kaldır")
+    p_models = sub.add_parser("models", help="Sağlayıcının güncel model listesini göster")
+    p_models.add_argument("provider", nargs="?", choices=PROVIDER_CHOICES, help="varsayılan: ayarlardaki sağlayıcı")
+    p_update = sub.add_parser("update", help="limon'u son sürüme güncelle")
+    p_update.add_argument("--check", action="store_true", help="yalnızca yeni sürüm var mı diye bak")
+    parser.add_argument("-V", "--version", action="version", version=f"limon {__version__}")
     parser.add_argument("-p", "--prompt", help="Tek seferlik komut (REPL açmadan çalıştır)")
     args = parser.parse_args()
 
+    if args.command == "update":
+        from .update import run_update
+        sys.exit(run_update(check_only=args.check))
+
     cfg = cfgmod.load_config()
+
+    if args.command == "models":
+        show_models(args.provider or "")
+        return
 
     if args.command == "config":
         run_setup_wizard()
@@ -281,6 +347,9 @@ def main():
                 print(f"{YELLOW}{wait} saniye sonra tekrar denenecek...{RESET}")
                 time.sleep(wait)
                 continue
+            except Exception as e:
+                print(f"{RED}Hata: {e}{RESET}")
+                sys.exit(1)
         return
 
     repl(cfg)

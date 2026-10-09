@@ -114,23 +114,17 @@
 						<button class="os-tab px-5 py-2 rounded-lg border border-white/10 bg-white/5 text-white/70" data-os="windows">Windows</button>
 					</div>
 
-					<!-- Ortak Adımlar -->
-					<div class="p-6 rounded-xl border border-white/10 bg-white/5">
-						<code class="text-limon"> git clone https://github.com/aardaakpinar/limon.git && cd limon </code>
-					</div>
-
 					<!-- Linux/macOS -->
 					<div class="os-content" id="unix-content">
-						<p class="mb-3 text-sm text-white/40"><span class="text-white/60">chmod +x install.sh</span> komutu gerekebilir.</p>
-						<div class="p-6 rounded-xl border border-white/10 bg-white/5">
-							<code class="text-limon"> bash install.sh </code>
+						<div class="p-6 rounded-xl border border-white/10 bg-white/5 overflow-x-auto">
+							<code class="text-limon whitespace-nowrap"> curl -fsSL https://aardaakpinar.github.io/limon/install.sh | bash </code>
 						</div>
 					</div>
 
 					<!-- Windows -->
 					<div class="os-content hidden" id="windows-content">
 						<div class="p-6 rounded-xl border border-white/10 bg-white/5">
-							<code class="text-limon"> powershell -ExecutionPolicy Bypass -File .\install.ps1 </code>
+							<code class="text-limon whitespace-nowrap"> irm https://aardaakpinar.github.io/limon/install.ps1 | iex </code>
 						</div>
 					</div>
 
