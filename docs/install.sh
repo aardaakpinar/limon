@@ -15,7 +15,7 @@ EXTRAS="all"
 VENV_DIR=".venv"
 USE_VENV=1
 BIN_DIR="$HOME/.local/bin"
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]:-$0}")" &>/dev/null && pwd)"
 
 # --- Renkli çıktı yardımcıları ---------------------------------------------
 if [ -t 1 ]; then
