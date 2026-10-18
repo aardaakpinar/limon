@@ -96,6 +96,30 @@ def _summarize_args(tool_name: str, args: dict) -> str:
     return str(args)
 
 
+def select_model(cfg: dict, previous_provider: str = "") -> str:
+    """Seçim listesiyle model seçtirir (canlı liste; alınamazsa elle giriş).
+    Sihirbaz ve REPL'deki /model tarafından kullanılır."""
+    from .models import list_models
+    from .picker import choose_model
+
+    provider = cfg["provider"]
+    suggested = cfgmod.suggest_model(
+        provider, cfg.get("model", ""), provider_changed=bool(previous_provider) and provider != previous_provider
+    )
+
+    def fetch():
+        key = cfgmod.get_api_key(cfg, provider)
+        if provider != "ollama" and not key:
+            raise RuntimeError("liste için önce API anahtarı gerekli")
+        try:
+            return list_models(provider, api_key=key, ollama_host=cfg.get("ollama_host", ""))
+        except Exception as e:
+            raise RuntimeError(humanize_provider_error(e))
+
+    print(f"\n{BOLD}Model seç{RESET} ({provider})")
+    return choose_model(suggested, fetch, current=cfg.get("model", ""))
+
+
 def run_setup_wizard():
     cfg = cfgmod.load_config()
     print(BANNER)
@@ -114,24 +138,7 @@ def run_setup_wizard():
             except (ValueError, IndexError):
                 print(f"{RED}Geçersiz seçim, mevcut sağlayıcı korunuyor.{RESET}")
 
-        suggested = cfgmod.suggest_model(
-            cfg["provider"], cfg.get("model", ""), provider_changed=cfg["provider"] != previous_provider
-        )
-        model = input(f"Model [{suggested}] (? = canlı liste): ").strip()
-        if model == "?":
-            try:
-                from .models import list_models
-                key = cfgmod.get_api_key(cfg, cfg["provider"])
-                if cfg["provider"] != "ollama" and not key:
-                    print(f"{YELLOW}Liste için önce API anahtarı gerekli; anahtarı girdikten sonra 'limon models' çalıştır.{RESET}")
-                else:
-                    for m in list_models(cfg["provider"], api_key=key, ollama_host=cfg.get("ollama_host", "")):
-                        print(f"  {m}")
-            except Exception as e:
-                print(f"{RED}Liste alınamadı: {humanize_provider_error(e)}{RESET}")
-            model = input(f"Model [{suggested}]: ").strip()
-        cfg["model"] = model or suggested
-
+        # Sıra: sağlayıcı -> anahtar/host -> model. Canlı model listesi için anahtar önce gerekir.
         if cfg["provider"] in ("openai", "gemini", "claude"):
             current = cfg["api_keys"].get(cfg["provider"], "")
             masked = (current[:4] + "..." + current[-4:]) if len(current) > 8 else ("(yok)" if not current else current)
@@ -142,6 +149,8 @@ def run_setup_wizard():
             host = input(f"Ollama host [{cfg.get('ollama_host')}]: ").strip()
             if host:
                 cfg["ollama_host"] = host
+
+        cfg["model"] = select_model(cfg, previous_provider=previous_provider)
 
         threshold = input(f"Tehlike onay eşiği (0-10) [{cfg.get('danger_threshold')}]: ").strip()
         if threshold:
@@ -184,7 +193,7 @@ def repl(cfg: dict):
     proj = find_project_instructions()
     if proj:
         print(f"{DIM}proje talimatları yüklendi: {proj[0]}{RESET}")
-    print(f"{DIM}çıkmak için: exit / quit / Ctrl+D{RESET}\n")
+    print(f"{DIM}/model: model seç | /config: ayarlar | /reset: konuşmayı sıfırla | çıkmak için: exit / Ctrl+D{RESET}\n")
 
     while True:
         try:
@@ -200,6 +209,17 @@ def repl(cfg: dict):
         if user_input.lower() in ("/config",):
             run_setup_wizard()
             cfg = cfgmod.load_config()
+            provider = build_provider(cfg)
+            agent = Agent(provider, danger_threshold=cfg.get("danger_threshold", 5))
+            print(f"{DIM}sağlayıcı: {cfg['provider']} | model: {cfg['model']} | eşik: {cfg.get('danger_threshold')}{RESET}")
+            continue
+        if user_input.lower() in ("/model",):
+            try:
+                cfg["model"] = select_model(cfg)
+            except (EOFError, KeyboardInterrupt):
+                print()
+                continue
+            cfgmod.save_config(cfg)
             provider = build_provider(cfg)
             agent = Agent(provider, danger_threshold=cfg.get("danger_threshold", 5))
             print(f"{DIM}sağlayıcı: {cfg['provider']} | model: {cfg['model']} | eşik: {cfg.get('danger_threshold')}{RESET}")
@@ -302,6 +322,8 @@ def main():
     p_models.add_argument("provider", nargs="?", choices=PROVIDER_CHOICES, help="varsayılan: ayarlardaki sağlayıcı")
     p_update = sub.add_parser("update", help="limon'u son sürüme güncelle")
     p_update.add_argument("--check", action="store_true", help="yalnızca yeni sürüm var mı diye bak")
+    from .daemon.cli import add_parsers as add_daemon_parsers
+    add_daemon_parsers(sub)  # daemon, events, diagnose, approvals, approve, reject
     parser.add_argument("-V", "--version", action="version", version=f"limon {__version__}")
     parser.add_argument("-p", "--prompt", help="Tek seferlik komut (REPL açmadan çalıştır)")
     args = parser.parse_args()
@@ -309,6 +331,10 @@ def main():
     if args.command == "update":
         from .update import run_update
         sys.exit(run_update(check_only=args.check))
+
+    if args.command in ("daemon", "events", "diagnose", "approvals", "approve", "reject"):
+        from .daemon.cli import dispatch as daemon_dispatch
+        sys.exit(daemon_dispatch(args) or 0)
 
     cfg = cfgmod.load_config()
 

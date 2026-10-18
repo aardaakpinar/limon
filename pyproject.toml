@@ -42,7 +42,7 @@ Issues = "https://github.com/aardaakpinar/limon/issues"
 limon = "limon.cli:entrypoint"
 
 [tool.setuptools]
-packages = ["limon", "limon.providers"]
+packages = ["limon", "limon.providers", "limon.daemon", "limon.daemon.adapters"]
 
 [tool.setuptools.dynamic]
 version = { attr = "limon.__version__" }

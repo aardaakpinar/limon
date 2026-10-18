@@ -8,7 +8,7 @@ API anahtarları, tehlike eşiği) saklar.
 import json
 import os
 
-CONFIG_DIR = os.path.expanduser("~/.config/limon")
+CONFIG_DIR = os.environ.get("LIMON_CONFIG_DIR") or os.path.expanduser("~/.config/limon")  # daemon (sistem kapsamı) için geçersiz kılınabilir
 CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
 
 DEFAULT_MODELS = {
