@@ -105,11 +105,23 @@ fi
 
 # --- Sanal ortam ------------------------------------------------------------
 if [ "$USE_VENV" -eq 1 ]; then
+  # Yarım kalmış / bozuk bir venv (ör. python3-venv eksikken oluşmuş) varsa sil.
   if [ -d "$VENV_DIR" ]; then
-    info "Mevcut sanal ortam kullanılıyor: $VENV_DIR"
-  else
+    if [ -x "$VENV_DIR/bin/python" ] && "$VENV_DIR/bin/python" -m pip --version >/dev/null 2>&1; then
+      info "Mevcut sanal ortam kullanılıyor: $VENV_DIR"
+    else
+      warn "Mevcut sanal ortam bozuk (pip yok), yeniden oluşturuluyor: $VENV_DIR"
+      rm -rf "$VENV_DIR"
+    fi
+  fi
+
+  if [ ! -d "$VENV_DIR" ]; then
     info "Sanal ortam oluşturuluyor: $VENV_DIR"
-    "$PYTHON_BIN" -m venv "$VENV_DIR"
+    if ! "$PYTHON_BIN" -m venv "$VENV_DIR"; then
+      rm -rf "$VENV_DIR"
+      error "Sanal ortam oluşturulamadı. Debian/Ubuntu'da: sudo apt install python3-venv"
+      exit 1
+    fi
   fi
 
   # Etkinleştirmeye (activate) gerek yok: doğrudan venv'in Python'unu kullanıyoruz.
