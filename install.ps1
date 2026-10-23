@@ -1,20 +1,20 @@
 ﻿<#
 .SYNOPSIS
-    limon - Windows kolay kurulum beti─şi
+    limon - Windows kolay kurulum betigi
 
 .DESCRIPTION
-    .venv sanal ortam─▒ olu┼şturur, limon'u (istenen extralarla) kurar ve
-    'limon' komutunu %USERPROFILE%\.local\bin alt─▒na kopyalay─▒p PATH'e ekler;
-    b├Âylece sanal ortam─▒ etkinle┼ştirmeden her terminalden ├ğal─▒┼ş─▒r.
+    .venv sanal ortami olusturur, limon'u (istenen extralarla) kurar ve
+    'limon' komutunu %USERPROFILE%\.local\bin altina kopyalayip PATH'e ekler;
+    boylece sanal ortami etkinlestirmeden her terminalden calisir.
 
 .PARAMETER Extras
-    Kurulacak ekstra sa─şlay─▒c─▒ ba─ş─▒ml─▒l─▒klar─▒: all, claude, openai, gemini.
+    Kurulacak ekstra saglayici bagimliliklar: all, claude, openai, gemini.
 
 .PARAMETER VenvDir
-    Kullan─▒lacak sanal ortam klas├Âr├╝ (varsay─▒lan: .venv).
+    Kullanilacak sanal ortam klasoru (varsayilan: .venv).
 
 .PARAMETER NoVenv
-    Belirtilirse sanal ortam olu┼şturmadan mevcut Python ortam─▒na kurar.
+    Belirtilirse sanal ortam olusturmadan mevcut Python ortamina kurar.
 
 .EXAMPLE
     .\install.ps1
@@ -38,7 +38,7 @@ function Write-Err2  { param([string]$Message) Write-Host "HATA: $Message" -Fore
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $ScriptDir
 
-# --- Python kontrol├╝ ---------------------------------------------------------
+# --- Python kontrolu ---------------------------------------------------------
 $PythonBin = $null
 foreach ($candidate in @("py", "python", "python3")) {
     if (Get-Command $candidate -ErrorAction SilentlyContinue) {
@@ -48,11 +48,11 @@ foreach ($candidate in @("py", "python", "python3")) {
 }
 
 if (-not $PythonBin) {
-    Write-Err2 "Python 3.9+ bulunamad─▒. L├╝tfen Python'u kurup PATH'e ekleyin ve tekrar deneyin."
+    Write-Err2 "Python 3.9+ bulunamadi. Lutfen Python'u kurup PATH'e ekleyin ve tekrar deneyin."
     exit 1
 }
 
-# 'py' launcher kullan─▒l─▒yorsa -3 ile Python 3'├╝ zorla
+# 'py' launcher kullaniliyorsa -3 ile Python 3'u zorla
 $PythonArgsPrefix = @()
 if ($PythonBin -eq "py") {
     $PythonArgsPrefix = @("-3")
@@ -72,16 +72,42 @@ if ($MajorVersion -lt 3 -or ($MajorVersion -eq 3 -and $MinorVersion -lt 9)) {
 
 # --- Sanal ortam --------------------------------------------------------------
 if (-not $NoVenv) {
+    $VenvPath = $null
     if (Test-Path $VenvDir) {
-        Write-Info "Mevcut sanal ortam kullaniliyor: $VenvDir"
-    } else {
+        $VenvPath   = (Resolve-Path $VenvDir).Path
+        $VenvPython = Join-Path $VenvPath "Scripts\python.exe"
+        $VenvReady  = Test-Path $VenvPython
+        if ($VenvReady) {
+            & $VenvPython -m pip --version 2>$null | Out-Null
+            $VenvReady = ($LASTEXITCODE -eq 0)
+        }
+        if ($VenvReady) {
+            Write-Info "Mevcut sanal ortam kullaniliyor: $VenvDir"
+        } else {
+            Write-Warn2 "Sanal ortam eksik veya bozuk; yeniden olusturuluyor: $VenvDir"
+            try {
+                Remove-Item $VenvPath -Recurse -Force
+            } catch {
+                Write-Err2 "'$VenvPath' silinemedi. Terminali kapatip tekrar deneyin."
+                exit 1
+            }
+            $VenvPath = $null
+        }
+    }
+
+    if (-not $VenvPath) {
         Write-Info "Sanal ortam olusturuluyor: $VenvDir"
         & $PythonBin @PythonArgsPrefix -m venv $VenvDir
+        if ($LASTEXITCODE -ne 0) {
+            Write-Err2 "Sanal ortam olusturulamadi."
+            exit 1
+        }
+        $VenvPath = (Resolve-Path $VenvDir).Path
     }
 
     # Activate.ps1 gerekmez (ve script calistirma politikasina takilmaz):
     # dogrudan sanal ortamin python.exe'sini kullaniyoruz.
-    $VenvScripts = Join-Path (Resolve-Path $VenvDir).Path "Scripts"
+    $VenvScripts = Join-Path $VenvPath "Scripts"
     $VenvPython  = Join-Path $VenvScripts "python.exe"
 
     if (-not (Test-Path $VenvPython)) {
@@ -120,8 +146,14 @@ if (-not $NoVenv) {
 
     if (Test-Path $LimonExe) {
         New-Item -ItemType Directory -Force -Path $BinDir | Out-Null
-        Copy-Item $LimonExe (Join-Path $BinDir "limon.exe") -Force
-        Write-Info "Komut kopyalandi: $(Join-Path $BinDir 'limon.exe')"
+        $CopiedExe = Join-Path $BinDir "limon.exe"
+        Copy-Item $LimonExe $CopiedExe -Force
+        Write-Info "Komut kopyalandi: $CopiedExe"
+
+        & $CopiedExe --version 2>$null | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warn2 "Kopyalanan 'limon' dogrulanamadi. Kurulumu tekrar calistirmayi deneyin."
+        }
 
         $UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
         $Entries  = @($UserPath -split ";" | Where-Object { $_ })

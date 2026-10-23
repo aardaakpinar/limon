@@ -51,11 +51,19 @@ try {
     Move-Item $Extracted.FullName $Src
     Write-Host "==> Kodlar yerlestirildi: $Src" -ForegroundColor Green
 
+    # Eski surumlerde depo kokunde install.ps1 olmayabilir; bu durumda main dalindan al.
+    $RepoInstall = Join-Path $Src "install.ps1"
+    if (-not (Test-Path $RepoInstall)) {
+        Write-Host "==> install.ps1 arsivde yok; main dalindan indiriliyor..." -ForegroundColor Yellow
+        $RawInstall = "https://raw.githubusercontent.com/$Repo/main/install.ps1"
+        Invoke-WebRequest -Uri $RawInstall -OutFile $RepoInstall -UseBasicParsing
+    }
+
     # Asil kurulumu depodaki install.ps1 yapar. Betik dosyasi calistirma politikasina
     # takilmasin diye ayri bir powershell sureci ve -ExecutionPolicy Bypass kullanilir.
     $Venv = Join-Path $Home2 "venv"
     $Exe = if (Get-Command powershell.exe -ErrorAction SilentlyContinue) { "powershell.exe" } else { "pwsh" }
-    & $Exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $Src "install.ps1") -Extras $Extras -VenvDir $Venv
+    & $Exe -NoProfile -ExecutionPolicy Bypass -File $RepoInstall -Extras $Extras -VenvDir $Venv
     if ($LASTEXITCODE -ne 0) { throw "Kurulum basarisiz oldu (cikis kodu: $LASTEXITCODE)." }
 
     # PATH degisikligi bu pencerede de gecerli olsun (iex ayni oturumda calisir)
@@ -66,7 +74,8 @@ try {
     }
 }
 catch {
-    Write-Host "HATA: $_" -ForegroundColor Red
+    # exit kullanmak, irm | iex ile calistirildiginda pencereyi kapatabilir.
+    throw "Kurulum basarisiz: $_"
 }
 finally {
     Remove-Item $Tmp -Recurse -Force -ErrorAction SilentlyContinue
