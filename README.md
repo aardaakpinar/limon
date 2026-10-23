@@ -93,17 +93,18 @@ limon config    # sağlayıcı: ollama
 
 1. Bir istek yazarsın. Model gerekirse bir araç çağırır:
 
-   | Araç | Ne yapar |
-   | --- | --- |
-   | `read_file` | Dosyayı okur (`start_line`/`end_line` ile satır aralığı) |
-   | `edit_file` | Dosyada birebir eşleşen metni değiştirir (yedek alır) |
-   | `write_file` | Yeni dosya yazar / baştan yazar (yedek alır) |
-   | `delete_file` | Dosyayı siler (yedek alır) |
-   | `list_dir`, `glob` | Dizin listeler, desene göre dosya bulur (`**/*.py`) |
-   | `grep` | Dosya içeriğinde regex arar (`.git`, `.venv`, `.env` vb. atlanır) |
-   | `web_fetch` | Web sayfasını okunabilir metne çevirir |
-   | `run_command` | Kabukta komut çalıştırır (zaman aşımı en fazla 10 dk) |
-   | `get_current_datetime` | Tarih/saat |
+    | Araç                   | Ne yapar                                                          |
+    | ---------------------- | ----------------------------------------------------------------- |
+    | `read_file`            | Dosyayı okur (`start_line`/`end_line` ile satır aralığı)          |
+    | `edit_file`            | Dosyada birebir eşleşen metni değiştirir (yedek alır)             |
+    | `write_file`           | Yeni dosya yazar / baştan yazar (yedek alır)                      |
+    | `delete_file`          | Dosyayı siler (yedek alır)                                        |
+    | `list_dir`, `glob`     | Dizin listeler, desene göre dosya bulur (`**/*.py`)               |
+    | `grep`                 | Dosya içeriğinde regex arar (`.git`, `.venv`, `.env` vb. atlanır) |
+    | `web_fetch`            | Web sayfasını okunabilir metne çevirir                            |
+    | `run_command`          | Kabukta komut çalıştırır (zaman aşımı en fazla 10 dk)             |
+    | `get_current_datetime` | Tarih/saat                                                        |
+
 2. limon her çağrıya [`danger.py`](limon/danger.py) içindeki kurallara göre **0–10 arası bir tehlike skoru** verir (`rm -rf`, `sudo`, `dd`, `curl | bash`, sistem dizinleri vb.).
 3. Skor eşiğe ulaşırsa (varsayılan **5**) senden onay ister; ulaşmazsa işlem doğrudan çalışır. Hassas dosyaları okumak (`~/.ssh`, `.env`, limon'un kendi `config.json`'u, `*.pem`...) ve yerel/özel ağ adreslerine `web_fetch` yapmak da onay gerektirir.
 4. Üzerine yazılan veya silinen dosyaların yedeği `.limon_backups/` klasörüne alınır.
@@ -132,20 +133,20 @@ Daemon'ın terminali olmadığı için onay gerektiren işlemler kalıcı bir ku
 
 ```json
 {
-  "daemon": {
-    "mode": "report",
-    "watch_units": ["nginx.service"],
-    "auto_units": [],
-    "allowed_roots": []
-  }
+	"daemon": {
+		"mode": "report",
+		"watch_units": ["nginx.service"],
+		"auto_units": [],
+		"allowed_roots": []
+	}
 }
 ```
 
-| `mode` | Davranış |
-| --- | --- |
-| `off` | Yalnızca olayları kaydeder; sağlayıcıya hiçbir şey gönderilmez, hiçbir eylem yapılmaz. |
-| `report` *(varsayılan)* | Teşhis eder, eylem planını **onay kuyruğuna** koyar. Sen onaylamadan hiçbir şey uygulanmaz. |
-| `auto` | Yalnızca `auto_units` listesindeki, `auto_actions` içindeki (`reset_failed`, `restart_service`) düşük riskli eylemler onaysız yürür. `auto_units` boşsa hiçbir şey otomatik değildir. Korumalı birimler (sshd, systemd-*, dbus, NetworkManager…), dosya düzenleme ve yüksek riskli her şey yine onay ister. |
+| `mode`                  | Davranış                                                                                                                                                                                                                                                                                                     |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `off`                   | Yalnızca olayları kaydeder; sağlayıcıya hiçbir şey gönderilmez, hiçbir eylem yapılmaz.                                                                                                                                                                                                                       |
+| `report` _(varsayılan)_ | Teşhis eder, eylem planını **onay kuyruğuna** koyar. Sen onaylamadan hiçbir şey uygulanmaz.                                                                                                                                                                                                                  |
+| `auto`                  | Yalnızca `auto_units` listesindeki, `auto_actions` içindeki (`reset_failed`, `restart_service`) düşük riskli eylemler onaysız yürür. `auto_units` boşsa hiçbir şey otomatik değildir. Korumalı birimler (sshd, systemd-\*, dbus, NetworkManager…), dosya düzenleme ve yüksek riskli her şey yine onay ister. |
 
 Diğer ayarlar (hepsi isteğe bağlı, sınırlara kırpılır; internet araması için aşağıya bak): `poll_interval`, `cooldown`, `error_burst_threshold`, `disk_warn`/`disk_crit`, `max_fix_attempts_per_event`, `max_actions_per_unit_per_hour`, `max_actions_per_day`, `retention_days`, `protected_units` (varsayılan koruma listesi küçültülemez, yalnızca genişletilir).
 
@@ -154,7 +155,7 @@ Diğer ayarlar (hepsi isteğe bağlı, sınırlara kırpılır; internet aramas�
 AI **kabuk komutu üretemez.** Yalnızca şu tipli eylemleri önerebilir: `report_only`, `reset_failed <birim>`, `restart_service <birim>`, `edit_file <yol> <eski> <yeni>` (varsayılan olarak kapalı; yalnızca `allowed_roots` içinde ve her zaman onayla).
 
 - **Mevcut `danger.py` korunur** ama tek sınır değildir. Asıl sınırlar: eylem izin listesi, hedefin olayla ilgili birim olması (loglardaki bir enjeksiyon "sshd'yi yeniden başlat" dedirtemez), korumalı birimler, yol normalleştirme + izinli kök dizinler (simge bağlantısı kaçışları dahil), saatlik/günlük hız sınırları ve olay başına deneme sınırı (döngü koruması).
-- **Güvenilmeyen veri:** loglar prompt'ta `<veri>` bloğunda verilir, talimat olarak uygulanmaz. Teşhiste mevcut `Agent` (dosya/kabuk araçlı) bilerek *kullanılmaz*; sağlayıcıya yalnızca çalıştırılmayan tek bir `submit_diagnosis` şema aracı verilir.
+- **Güvenilmeyen veri:** loglar prompt'ta `<veri>` bloğunda verilir, talimat olarak uygulanmaz. Teşhiste mevcut `Agent` (dosya/kabuk araçlı) bilerek _kullanılmaz_; sağlayıcıya yalnızca çalıştırılmayan tek bir `submit_diagnosis` şema aracı verilir.
 - **Gizli veri:** API anahtarları, token/parola desenleri, özel anahtarlar, `://kullanıcı:parola@` URL'leri sağlayıcıya gitmeden ve diske yazılmadan süzülür. Ortam değişkenleri ve dosya içerikleri sağlayıcıya gönderilmez; alt süreçlere de aktarılmaz.
 - **Yürütme:** kabuk yok (argv), zaman aşımı, çıktı sınırı, süreç grubu temizliği. Dosya düzenlemede yedek (`durum_dizini/backups`), atomik yazma, izin koruma; düzeltme sonrası servis sağlıklı değilse otomatik **geri alma**.
 - **IPC:** yalnızca Unix domain socket (ağ yok); dizin `0700`, soket `0600`, her bağlantıda `SO_PEERCRED` ile uid denetimi, istek boyutu ve şema doğrulaması.
@@ -168,15 +169,16 @@ Güncel/bilinen bir hata için model, teşhisi göndermeden önce en fazla birka
 { "daemon": { "web_search": "searxng", "web_search_url": "http://localhost:8080" } }
 ```
 
-| `web_search` | Gereken |
-| --- | --- |
-| `off` *(varsayılan)* | — |
-| `searxng` | Kendi barındırdığın SearXNG; `web_search_url` ve `settings.yml` içinde JSON çıktısı etkin olmalı. Sorgular dışarıya çıkmaz. |
-| `brave` | Brave Search API anahtarı: `BRAVE_API_KEY` ortam değişkeni veya `api_keys.brave`. Sorgular Brave'e gider. |
+| `web_search`         | Gereken                                                                                                                     |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `off` _(varsayılan)_ | —                                                                                                                           |
+| `searxng`            | Kendi barındırdığın SearXNG; `web_search_url` ve `settings.yml` içinde JSON çıktısı etkin olmalı. Sorgular dışarıya çıkmaz. |
+| `brave`              | Brave Search API anahtarı: `BRAVE_API_KEY` ortam değişkeni veya `api_keys.brave`. Sorgular Brave'e gider.                   |
 
 Diğer ayarlar: `web_search_max_rounds` (teşhis başına tur, varsayılan 2), `web_search_daily_limit` (varsayılan 30), `web_search_results` (varsayılan 5).
 
 **Gizlilik ve güvenlik:**
+
 - Sorgudan sırlar, IP, e-posta, URL, `/home/...` yolları, UUID ve uzun rastgele dizgiler çıkarılır; sorgu 120 karakterle sınırlanır. **Ana makine adları otomatik ayıklanamaz**; gönderilen her sorgu audit günlüğünde (`web_search` kayıtları) görülebilir. Gizlilik önemliyse `searxng` ile kendi örneğini kullan.
 - Yalnızca arama sonucu başlığı/özeti/URL'si alınır; sonuç sayfaları indirilmez (SSRF ve sayfa içi prompt enjeksiyonu yüzeyi yok).
 - Web içeriği modeli yanıltabilir, ama eylemleri yine yerel politika denetler: izinli eylem türleri, olayla ilgili hedef, korumalı birimler, onay kuyruğu.
@@ -184,13 +186,13 @@ Diğer ayarlar: `web_search_max_rounds` (teşhis başına tur, varsayılan 2), `
 
 ### Kurulum kapsamı
 
-| | `limon daemon install` *(varsayılan)* | `limon daemon install --system` |
-| --- | --- | --- |
-| Çalışan kullanıcı | Sen (root değil) | Ayrı, kısıtlı `limon` sistem kullanıcısı (root değil) |
-| Servis | `systemctl --user` (`~/.config/systemd/user`) | `/etc/systemd/system` |
-| Yönetebildiği | Kendi oturum servislerin; sistem servislerini yalnızca izler | Sistem servisleri — yalnızca `restart`/`reset-failed`, yalnızca adı geçen birimler (polkit kuralı; `sudo` yok) |
-| Gereken | Kullanıcı systemd oturumu | Kurulum için bir kez root; limon'un herkesin okuyabildiği bir yolda kurulu olması (`--python /opt/limon/bin/python`) |
-| API anahtarı | `~/.config/limon/config.json` (0600) | `/etc/limon/limon.env` (0640 root:limon) — unit dosyasına **gömülmez** |
+|                   | `limon daemon install` _(varsayılan)_                        | `limon daemon install --system`                                                                                      |
+| ----------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| Çalışan kullanıcı | Sen (root değil)                                             | Ayrı, kısıtlı `limon` sistem kullanıcısı (root değil)                                                                |
+| Servis            | `systemctl --user` (`~/.config/systemd/user`)                | `/etc/systemd/system`                                                                                                |
+| Yönetebildiği     | Kendi oturum servislerin; sistem servislerini yalnızca izler | Sistem servisleri — yalnızca `restart`/`reset-failed`, yalnızca adı geçen birimler (polkit kuralı; `sudo` yok)       |
+| Gereken           | Kullanıcı systemd oturumu                                    | Kurulum için bir kez root; limon'un herkesin okuyabildiği bir yolda kurulu olması (`--python /opt/limon/bin/python`) |
+| API anahtarı      | `~/.config/limon/config.json` (0600)                         | `/etc/limon/limon.env` (0640 root:limon) — unit dosyasına **gömülmez**                                               |
 
 Unit dosyası `Restart=on-failure`, `NoNewPrivileges`, `PrivateTmp`, `RestrictAddressFamilies`, `UMask=0077`; sistem kapsamında ek olarak `ProtectSystem=strict`, `ProtectHome`, boş `CapabilityBoundingSet` kullanır. Kurulum tekrar çalıştırılabilir. Oturum kapalıyken de çalışması için `loginctl enable-linger $USER`. `limon daemon uninstall` servisi kaldırır, durum verisini korur (`--purge` siler).
 
@@ -219,6 +221,28 @@ Testleri `pytest -q` ile çalıştır. Commit mesajlarını Türkçe yaz. `legac
 - `run_command` doğrudan kabukta çalışır. Skorlama regex tabanlıdır ve kusursuz değildir; kritik sistemlerde eşiği düşük tut.
 - API anahtarların yalnızca yerel config dosyasında durur ve sadece seçtiğin sağlayıcıya gönderilir.
 - Yazılım "olduğu gibi" sunulur; önemli sistemlerde kullanmadan önce `danger.py` kurallarını gözden geçir.
+
+## Sorun giderme
+
+**`limon` hiçbir çıktı vermeden kapanıyor (özellikle Windows).** `limon` kısayolu, kurulumun sanal ortamına (`~/.limon/venv`, Windows: `%USERPROFILE%\.limon\venv`) bağlıdır. Bu klasörü siler veya taşırsan komut sessizce çalışmaz. Kurulumu yeniden çalıştırmak hem eksik dosyaları geri getirir hem de günceller:
+
+```powershell
+irm https://aardaakpinar.github.io/limon/install.ps1 | iex          # Windows
+```
+
+```bash
+curl -fsSL https://aardaakpinar.github.io/limon/install.sh | bash    # Linux / macOS
+```
+
+Klondan kurulumda: `powershell -ExecutionPolicy Bypass -File .\install.ps1` veya `bash install.sh`.
+
+**`API anahtarı bulunamadı` / `401` hatası.** `limon config` ile anahtarı gir ya da ilgili ortam değişkenini tanımla (`OPENAI_API_KEY`, `GEMINI_API_KEY`, `ANTHROPIC_API_KEY`). Ollama için anahtar gerekmez; `ollama serve` çalışıyor olmalı.
+
+**Windows'ta çıktıda `?` veya bozuk karakterler.** Eski konsol kod sayfaları (ör. cp1254) `←`, `█` gibi simgeleri gösteremez. Windows Terminal kullanmayı veya `chcp 65001` çalıştırmayı dene. limon bu durumda artık çökmek yerine kodlayamadığı karakteri `?` olarak yazar.
+
+**`limon daemon ...` çalışmıyor.** Arka plan ajanı yalnızca **Linux + systemd** içindir. Windows/macOS'ta komutlar açık bir uyarı verir; etkileşimli `limon` modu ve diğer komutlar platformdan bağımsız çalışır.
+
+**Model listesi gelmiyor.** `limon models` canlı liste için sağlayıcının API'sine bağlanır; anahtar yoksa, kota dolduysa veya ağ engelliyse liste alınamaz. Bu durumda `limon config` model adını elle yazmana izin verir.
 
 ## Sürüm yayınlama
 
