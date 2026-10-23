@@ -101,40 +101,63 @@
 
 		<!-- Kurulum -->
 		<section id="kurulum" class="py-24 grid-bg">
-			<div class="max-w-4xl mx-auto px-6 text-center">
-				<h2 class="text-3xl md:text-5xl font-bold mb-12">Dakikalar içinde hazır</h2>
+			<div class="max-w-4xl mx-auto px-6">
+				<div class="text-center mb-10">
+					<h2 class="text-3xl md:text-5xl font-bold mb-4">Dakikalar içinde hazır</h2>
+					<p class="text-white/60">Python 3.9+ gerekir. Kurulum tek komut; gerisini betik halleder.</p>
+				</div>
 
 				<div class="space-y-6 text-left">
-					<p class="text-white/60">İşletim sistemini seç. Python 3.9+ gerekir.</p>
-
 					<!-- OS Tabs -->
-					<div class="flex gap-4 mb-8">
+					<div class="flex gap-4">
 						<button class="os-tab px-5 py-2 rounded-lg border border-white/10 bg-limon text-black font-medium" data-os="unix">Linux / macOS</button>
-
 						<button class="os-tab px-5 py-2 rounded-lg border border-white/10 bg-white/5 text-white/70" data-os="windows">Windows</button>
 					</div>
 
 					<!-- Linux/macOS -->
-					<div class="os-content" id="unix-content">
+					<div class="os-content space-y-4" id="unix-content">
 						<div class="p-6 rounded-xl border border-white/10 bg-white/5 overflow-x-auto">
-							<code class="text-limon whitespace-nowrap"> curl -fsSL https://aardaakpinar.github.io/limon/install.sh | bash </code>
+							<p class="text-xs uppercase tracking-widest text-limon mb-3">1. Kur</p>
+							<code class="text-limon whitespace-nowrap">curl -fsSL https://aardaakpinar.github.io/limon/install.sh | bash</code>
+							<p class="text-sm text-white/50 mt-3">Kurulumdan sonra terminali yeniden aç. <span class="text-white/70">limon</span> artık her yerden çalışır.</p>
 						</div>
+						<details class="p-5 rounded-xl border border-white/10 bg-white/5">
+							<summary class="cursor-pointer text-sm text-white/70">Yalnızca tek bir sağlayıcı kurayım</summary>
+							<div class="mt-4 overflow-x-auto">
+								<code class="text-limon whitespace-nowrap">curl -fsSL https://aardaakpinar.github.io/limon/install.sh | bash -s -- --extras claude</code>
+							</div>
+							<p class="text-sm text-white/50 mt-3"><span class="text-white/70">claude</span>, <span class="text-white/70">openai</span>, <span class="text-white/70">gemini</span> veya <span class="text-white/70">all</span>.</p>
+						</details>
 					</div>
 
 					<!-- Windows -->
-					<div class="os-content hidden" id="windows-content">
-						<div class="p-6 rounded-xl border border-white/10 bg-white/5">
-							<code class="text-limon whitespace-nowrap"> irm https://aardaakpinar.github.io/limon/install.ps1 | iex </code>
+					<div class="os-content hidden space-y-4" id="windows-content">
+						<div class="p-6 rounded-xl border border-white/10 bg-white/5 overflow-x-auto">
+							<p class="text-xs uppercase tracking-widest text-limon mb-3">1. Kur (PowerShell)</p>
+							<code class="text-limon whitespace-nowrap">irm https://aardaakpinar.github.io/limon/install.ps1 | iex</code>
+							<p class="text-sm text-white/50 mt-3">Kurulumdan sonra yeni bir PowerShell penceresi aç. <span class="text-white/70">limon</span> artık her yerden çalışır.</p>
 						</div>
+						<details class="p-5 rounded-xl border border-white/10 bg-white/5">
+							<summary class="cursor-pointer text-sm text-white/70">Yalnızca tek bir sağlayıcı kurayım</summary>
+							<div class="mt-4 overflow-x-auto">
+								<code class="text-limon whitespace-nowrap">$env:LIMON_EXTRAS = "claude"; irm https://aardaakpinar.github.io/limon/install.ps1 | iex</code>
+							</div>
+							<p class="text-sm text-white/50 mt-3"><span class="text-white/70">claude</span>, <span class="text-white/70">openai</span>, <span class="text-white/70">gemini</span> veya <span class="text-white/70">all</span>.</p>
+						</details>
 					</div>
 
 					<!-- Ortak Adımlar -->
-					<div class="p-6 rounded-xl border border-white/10 bg-white/5">
-						<code class="text-limon">limon config</code>
-					</div>
-
-					<div class="p-6 rounded-xl border border-white/10 bg-white/5">
-						<code class="text-limon">limon</code>
+					<div class="grid md:grid-cols-2 gap-6">
+						<div class="p-6 rounded-xl border border-white/10 bg-white/5">
+							<p class="text-xs uppercase tracking-widest text-limon mb-3">2. Ayarları yap</p>
+							<code class="text-limon">limon config</code>
+							<p class="text-sm text-white/50 mt-3">Sağlayıcıyı, API anahtarını ve modeli seç.</p>
+						</div>
+						<div class="p-6 rounded-xl border border-white/10 bg-white/5">
+							<p class="text-xs uppercase tracking-widest text-limon mb-3">3. Başlat</p>
+							<code class="text-limon">limon</code>
+							<p class="text-sm text-white/50 mt-3">Etkileşimli mod açılır; isteğini normal cümleyle yaz.</p>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -160,6 +183,11 @@
 					tab.classList.add("bg-limon", "text-black");
 				});
 			});
+
+			// Ziyaretcinin isletim sistemine gore sekmeyi sec.
+			const isWindows = /Windows/i.test(navigator.userAgent);
+			const initialTab = document.querySelector(`.os-tab[data-os="${isWindows ? "windows" : "unix"}"]`);
+			if (initialTab) initialTab.click();
 		</script>
 
 		<!-- Footer -->
