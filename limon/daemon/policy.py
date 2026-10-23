@@ -84,7 +84,9 @@ class Policy:
             real = normalize_path(action.path)
             if not path_in_roots(real, cfg.allowed_roots):
                 return Decision(DENY, risk, [f"yol izinli köklerin dışında: {real}"])
-            if any(p in real + "/" or real.endswith(p) for p in _NEVER_EDIT):
+            # Ayırıcıları '/' yap: aynı kural Windows ve POSIX'te çalışsın.
+            real_slash = real.replace("\\", "/")
+            if any(p in real_slash + "/" or real_slash.endswith(p) for p in _NEVER_EDIT):
                 return Decision(DENY, risk, [f"hassas dosya düzenlenemez: {real}"])
             risk = max(risk, danger.assess_file_write(real, is_overwrite=True).score)
             reasons.append("dosya içeriği değişecek (yedek alınacak, doğrulama başarısızsa geri alınır)")

@@ -13,8 +13,8 @@ PAGE = 25
 def choose_model(
     suggested: str,
     fetch: Callable[[], List[str]],
-    ask: Callable[[str], str] = input,
-    say: Callable[[str], None] = print,
+    ask: Optional[Callable[[str], str]] = None,
+    say: Optional[Callable[[str], None]] = None,
     current: str = "",
 ) -> str:
     """Model seçtirir ve model kimliğini döndürür.
@@ -24,7 +24,13 @@ def choose_model(
       <numara>   listeden seç      /metin   filtrele (/ tek başına: filtreyi kaldır)
       <ad>       listede olmasa da bu model adını kullan
       Enter      önerilen/mevcut modeli koru
+
+    `ask`/`say` verilmezse varsayılan `input`/`print` kullanılır; varsayılanlar
+    import anında bağlanmaz, böylece testler ve sarmalayıcılar `builtins.input`
+    değiştirdiğinde de doğru fonksiyon çağrılır.
     """
+    ask = ask or input
+    say = say or print
     default = suggested or current
     try:
         models = list(fetch())

@@ -384,6 +384,14 @@ def main():
 def entrypoint():
     """Konsol betiği (limon.exe / limon) buradan başlar; beklenmedik
     Ctrl+C / EOF durumlarında çirkin bir traceback yerine temiz çıkış yapar."""
+    # Windows'ta konsol kod sayfası (ör. cp1254) her Unicode simgeyi (←, █, emoji)
+    # kodlayamaz; çıktı yönlendirildiğinde UnicodeEncodeError ile çökmek yerine
+    # kodlanamayan karakterleri '?' ile değiştir.
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(errors="replace")
+        except (AttributeError, ValueError):
+            pass
     try:
         main()
     except (KeyboardInterrupt, EOFError):

@@ -92,6 +92,8 @@ class IPCServer:
         return peer_allowed(uid, gid, self.group)
 
     def start(self) -> None:
+        if not hasattr(socket, "AF_UNIX"):
+            raise IPCError("Unix domain socket bu platformda desteklenmiyor (daemon yalnızca Linux'ta çalışır)")
         sock_path = self.paths.socket
         if len(sock_path.encode()) > 100:
             raise IPCError(f"soket yolu çok uzun: {sock_path}")
@@ -198,6 +200,10 @@ class IPCServer:
 
 def request(paths: Paths, op: str, params: Optional[dict] = None, timeout: float = 150) -> dict:
     """CLI tarafı. Daemon yoksa ConnectionError fırlatır."""
+    if not hasattr(socket, "AF_UNIX"):
+        # Windows'ta daemon/systemd yok; çevrimdışı yedeğe düşülsün diye
+        # traceback yerine normal "daemon yok" hatası ver.
+        raise ConnectionError("Unix domain socket bu platformda desteklenmiyor (daemon yalnızca Linux'ta çalışır)")
     s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     s.settimeout(timeout)
     try:

@@ -3,6 +3,7 @@ serbest metin komut yoktur."""
 
 import hashlib
 import json
+import os
 import re
 from dataclasses import dataclass, field
 from typing import Optional
@@ -83,7 +84,7 @@ def parse_action(raw) -> Action:
     # edit_file
     path = _s(raw, "path", 4096)
     old, new = _s(raw, "old_string", MAX_EDIT_CHARS), _s(raw, "new_string", MAX_EDIT_CHARS)
-    if not path or "\x00" in path or not path.startswith("/"):
+    if not path or "\x00" in path or not os.path.isabs(path):
         raise ActionError("edit_file için mutlak bir yol gerekli")
     if not old:
         raise ActionError("old_string boş olamaz")
