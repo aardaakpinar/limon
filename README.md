@@ -8,7 +8,7 @@ Desteklenen sağlayıcılar: **OpenAI (ChatGPT)** · **Google Gemini** · **Anth
 ![License](https://img.shields.io/badge/license-GPL--3.0-blue)
 ![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macOS%20%7C%20windows-lightgrey)
 
-![](docs/screenshot.png)
+![](docs/assets/screenshot.png)
 
 ## Neler yapabilir?
 
@@ -120,15 +120,15 @@ Etkileşimli modda `/config` ayarları, `/model` model listesini açar; `/reset`
 
 ### Sık kullanılan komutlar
 
-| Komut                | Ne yapar                                      |
-| -------------------- | --------------------------------------------- |
-| `limon`              | Etkileşimli modu başlatır                     |
-| `limon -p "soru"`    | Tek seferlik istek çalıştırır                 |
-| `limon config`       | Sağlayıcı, model, API anahtarı ve eşik ayarı  |
-| `limon models`       | Sağlayıcının güncel model listesini gösterir  |
-| `limon update`       | Son sürüme günceller (`--check` ile denetler) |
-| `limon uninstall`    | Limon ayarlarını siler                        |
-| `limon --version`    | Sürümü gösterir                               |
+| Komut             | Ne yapar                                      |
+| ----------------- | --------------------------------------------- |
+| `limon`           | Etkileşimli modu başlatır                     |
+| `limon -p "soru"` | Tek seferlik istek çalıştırır                 |
+| `limon config`    | Sağlayıcı, model, API anahtarı ve eşik ayarı  |
+| `limon models`    | Sağlayıcının güncel model listesini gösterir  |
+| `limon update`    | Son sürüme günceller (`--check` ile denetler) |
+| `limon uninstall` | Limon ayarlarını siler                        |
+| `limon --version` | Sürümü gösterir                               |
 
 ## Güvenlik
 
